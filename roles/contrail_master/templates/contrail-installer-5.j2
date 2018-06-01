@@ -200,11 +200,9 @@ spec:
       - name: zookeeper-logs
         hostPath:
           path: /var/log/contrail/zookeeper
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -243,11 +241,9 @@ spec:
             name: env
         - configMapRef:
             name: contrail-analytics-zookeeper
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -296,11 +292,24 @@ spec:
       - name: analyticsdb-log
         hostPath:
           path: /var/log/contrail/analyticsdb
-      imagePullSecrets:
+      - name: contrail-analytics-nodemgr
+        image: "ci-repo.englab.juniper.net:5000/contrail-nodemgr:ocata-5.0-33"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        - configMapRef:
+            name: contrail-analytics-zookeeper
+        env:
+        - name: NODE_TYPE
+          value: analyticsdb
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -349,11 +358,9 @@ spec:
       - name: configdb-log
         hostPath:
           path: /var/log/contrail/configdb
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -407,11 +414,9 @@ spec:
       - name: analytics-zookeeper-datalog
         hostPath:
           path: /var/lib/analytics_zookeeper_datalog
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -550,11 +555,9 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -660,11 +663,9 @@ spec:
           path: /var/run
       - name: dns-config
         emptyDir: {}
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -777,11 +778,9 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -840,11 +839,9 @@ spec:
       - name: webui-logs
         hostPath:
           path: /var/log/contrail/webui
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -896,11 +893,9 @@ spec:
       - name: redis-logs
         hostPath:
           path: /var/log/contrail/redis
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -953,11 +948,9 @@ spec:
       - name: rabbitmq-logs
         hostPath:
           path: /var/log/contrail/rabbitmq
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -1011,11 +1004,9 @@ spec:
       - name: pod-secret
         secret:
           secretName: contrail-kube-manager-token
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
 ---
 apiVersion: extensions/v1beta1
@@ -1159,9 +1150,7 @@ spec:
       - name: agent-logs
         hostPath:
           path: /var/log/contrail/agent
-      imagePullSecrets:
 {% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
       - name: contrail-registry-secret
-{% else %}        
-      - name: 
 {% endif %}
