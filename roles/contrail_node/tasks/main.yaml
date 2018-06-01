@@ -89,6 +89,7 @@
   run_once: True
   delegate_to: "{{ contrail_master }}"
   when: contrail_registry_username is defined
+  ignore_errors: True
 
 - name: Make master schedulable
   command: oadm manage-node {{ hostvars[item]['openshift_hostname'] }} --schedulable
