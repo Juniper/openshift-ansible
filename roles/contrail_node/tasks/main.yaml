@@ -1,92 +1,47 @@
 ---
-- when:
-  - contrail_version | int < 5
-
-  block:
-  - name: Stat for Contrail docker images
-    stat:
-      path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
-    register: image
-    with_items:
-    - contrail-agent
-    - contrail-kubernetes-agent
-
-  - name: Copy Contrail docker images file to remote host if not present
-    copy:
-      src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-      dest: "/tmp"
-    when: item.stat.exists == False
-    with_items: "{{ image.results }}"
-
-  - name: Untar Contrail docker images file
-    unarchive:
-      src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-      dest: "/tmp"
-      remote_src: True
-    when: item.stat.exists == False
-    with_items: "{{ image.results }}"
-
-  - name: Load Contrail docker images
-    docker_image:
-      name: "{{ item }}"
-      tag: "{{ contrail_version }}"
-      timeout: 300
-      load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
-    with_items: "{{ image.results }}"
+- name: Stat for Contrail docker images
+  stat:
+    path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+  register: image
+  with_items:
+  - contrail-agent
+  - contrail-kubernetes-agent
+  when: contrail_version|int < 5
 
 - name: Stat for loopback plugin
   stat:
     path: "/opt/cni/bin/loopback"
   register: loopback
 
+- name: Copy Contrail docker images file to remote host if not present
+  copy:
+    src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+    dest: "/tmp"
+  when: contrail_version|int < 5
+  with_items: "{{ image.results }}"
+
+- name: Untar Contrail docker images file
+  unarchive:
+    src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
+    dest: "/tmp"
+    remote_src: True
+  when: contrail_version|int < 5
+  with_items: "{{ image.results }}"
+
+- name: Load Contrail docker images
+  docker_image:
+    name: "{{ item }}"
+    tag: "{{ contrail_version }}"
+    timeout: 300
+    load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
+  with_items: "{{ image.results }}"
+  when: contrail_version|int < 5
+  
 - name: Add iptable rules to open ports used by Contrail services
   command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
   with_items:
     - { port: '8085', service: 'contrail-vrouter-agent-introspect' }
     - { port: '9091', service: 'contrail-cni' }
-
-- when:
-  - groups.lb is defined
-
-  block:
-  - name: Set Contrail WebUI SSL facts
-    set_fact:
-      websslpath: "/etc/contrail"
-      sslsub: "/C=US/ST=CA/LSunnyvale/O=JuniperNetworks/OU=JuniperCA/CN=ContrailCA"
-    run_once: True
-    delegate_to: "{{ groups.lb.0 }}"
-
-  - name: Ensure Contrail WebUI cert path exists
-    file:
-      path: "{{ websslpath }}"
-      recurse: True
-      state: directory
-    run_once: True
-    delegate_to: "{{ groups.lb.0 }}"
-
-  - name: Create SSL certs
-    command: "{{ item }}"
-    with_items:
-      - openssl req -new -newkey rsa:2048 -nodes -out {{ websslpath }}/certrequest.csr -keyout {{ websslpath }}/cs-key.pem -subj {{ sslsub }}
-      - openssl x509 -req -days 730 -in {{ websslpath }}/certrequest.csr -signkey {{ websslpath }}/cs-key.pem -out {{ websslpath }}/cs-cert.pem
-    run_once: True
-    delegate_to: "{{ groups.lb.0 }}"
-
-  - name: Concatenate SSL certs
-    assemble:
-      src: "{{ websslpath }}"
-      dest: "{{ websslpath }}/contrail-webui.pem"
-      remote_src: True
-    run_once: True
-    delegate_to: "{{ groups.lb.0 }}"
-
-  - name: Restart haproxy
-    systemd:
-      name: haproxy
-      state: restarted
-      daemon_reload: yes
-    run_once: True
-    delegate_to: "{{ groups.lb.0 }}"
 
 - when:
   - loopback.stat.exists == False
@@ -123,16 +78,18 @@
   run_once: True
   delegate_to: "{{ contrail_master }}"
 
-- name: Set default selector for kube-system namespace
-  command: oc annotate ns kube-system openshift.io/node-selector="" --overwrite
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
 - name: Label master nodes with opencontrail.org/controller=true
   command: oc label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true
   with_items: "{{ groups.masters }}"
   run_once: True
   delegate_to: "{{ contrail_master }}"
+
+- name: Create Contrail registry secret
+  command: oc create secret docker-registry contrail-registry-secret --docker-server="{{ contrail_registry }}" --docker-username="{{ contrail_registry_username }}" --docker-password="{{ contrail_registry_password }}" --docker-email=contrail@helloworld.com -n kube-system
+  run_once: True
+  delegate_to: "{{ contrail_master }}"
+  when: contrail_registry_username is defined
+  ignore_errors: True
 
 - name: Make master schedulable
   command: oadm manage-node {{ hostvars[item]['openshift_hostname'] }} --schedulable
@@ -145,6 +102,13 @@
   run_once: True
   delegate_to: "{{ contrail_master }}"
   ignore_errors: True
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
+  delegate_to: "{{ contrail_master }}" 
 
 - name: Patch restricted scc
   command: >
