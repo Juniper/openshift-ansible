@@ -1,3 +1,8 @@
+# Configs section
+# Note: using ".." for ports, because in v1 there is a bug
+# which leads to an error
+# "..error unmarshaling JSON: json: cannot unmarshal number into Go value of type string.."
+# (https://github.com/kubernetes/kubernetes/issues/2763)
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -5,28 +10,25 @@ metadata:
   name: env
   namespace: kube-system
 data:
-  AAA_MODE: "{{ aaa_mode }}"
-  ANALYTICS_API_VIP: "{{ groups.masters | ipaddr | join(',') }}"
-  ANALYTICS_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  ANALYTICSDB_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  AUTH_MODE: "{{ auth_mode }}"
-  CLOUD_ORCHESTRATOR: "{{ cloud_orchestrator }}"
-  CONFIG_API_VIP: "{{ groups.masters | ipaddr | join(',') }}"
-  CONFIG_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  CONFIGDB_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  CONTROL_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  CONTROLLER_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  KAFKA_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  LOG_LEVEL: "{{ log_level }}"
-  METADATA_PROXY_SECRET: "{{ metadata_proxy_secret }}"
-  PHYSICAL_INTERFACE: "{{ vrouter_physical_interface }}"
-  RABBITMQ_NODES: "{{ groups.masters | ipaddr | join(',') }}"
+  AAA_MODE: {{ aaa_mode }}
+  ANALYTICS_NODES: {{ groups.masters | ipaddr | join(',') }}
+  ANALYTICSDB_NODES: {{ groups.masters | ipaddr | join(',') }}
+  AUTH_MODE: {{ auth_mode }}
+  CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
+  CONFIG_NODES: {{ groups.masters | ipaddr | join(',') }}
+  CONFIGDB_NODES: {{ groups.masters | ipaddr | join(',') }}
+  CONTROL_NODES: {{ groups.masters | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ groups.masters | ipaddr | join(',') }}
+  KAFKA_NODES: {{ groups.masters | ipaddr | join(',') }}
+  LOG_LEVEL: {{ log_level }}
+  METADATA_PROXY_SECRET: {{ metadata_proxy_secret }}
+  PHYSICAL_INTERFACE: {{ vrouter_physical_interface }}
+  RABBITMQ_NODES: {{ groups.masters | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
-  REDIS_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  VROUTER_GATEWAY: "{{ vrouter_gateway }}"
-  WEBUI_NODES: "{{ groups.masters | ipaddr | join(',') }}"
-  WEBUI_VIP: "{{ groups.masters | ipaddr | join(',') }}"
-  ZOOKEEPER_NODES: "{{ groups.masters | ipaddr | join(',') }}"
+  REDIS_NODES: {{ groups.masters | ipaddr | join(',') }}
+  VROUTER_GATEWAY: {{ vrouter_gateway }}
+  WEBUI_NODES: {{ groups.masters | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ groups.masters | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -42,7 +44,7 @@ metadata:
   name: contrail-analyticsdb-config
   namespace: kube-system
 data:
-  CASSANDRA_SEEDS: "{{ groups.masters | ipaddr | join(',') }}"
+  CASSANDRA_SEEDS: {{ groups.masters | ipaddr | join(',') }}
   CASSANDRA_CLUSTER_NAME: Contrail
   CASSANDRA_START_RPC: "true"
   CASSANDRA_LISTEN_ADDRESS: auto
@@ -58,7 +60,7 @@ metadata:
   name: contrail-configdb-config
   namespace: kube-system
 data:
-  CASSANDRA_SEEDS: "{{ groups.masters | ipaddr | join(',') }}"
+  CASSANDRA_SEEDS: {{ groups.masters | ipaddr | join(',') }}
   CASSANDRA_CLUSTER_NAME: ContrailConfigDB
   CASSANDRA_START_RPC: "true"
   CASSANDRA_LISTEN_ADDRESS: auto
@@ -74,7 +76,7 @@ metadata:
   name: rabbitmq-config
   namespace: kube-system
 data:
-  RABBITMQ_NODES: "{{ groups.masters | ipaddr | join(',') }}"
+  RABBITMQ_NODES: {{ groups.masters | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
   RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
 ---
@@ -86,7 +88,7 @@ metadata:
 data:
   ZOOKEEPER_PORT: "{{ zookeeper_port }}"
   ZOOKEEPER_PORTS: "{{ zookeeper_ports }}"
-  ZOOKEEPER_NODES: "{{ groups.masters | ipaddr | join(',') }}"
+  ZOOKEEPER_NODES: {{ groups.masters | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -96,7 +98,9 @@ metadata:
 data:
   ZOOKEEPER_PORT: "{{ zookeeper_analytics_port }}"
   ZOOKEEPER_PORTS: "{{ zookeeper_analytics_ports }}"
-  ZOOKEEPER_NODES: "{{ groups.masters | ipaddr | join(',') }}"
+  ZOOKEEPER_NODES: {{ groups.masters | ipaddr | join(',') }}
+# Containers section
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -104,7 +108,7 @@ metadata:
   name: kube-manager-config
   namespace: kube-system
 data:
-  KUBERNETES_API_SERVER: "{{ api_vip | ipaddr }}"
+  KUBERNETES_API_SERVER: {{ api_vip | ipaddr }}
   KUBERNETES_API_SECURE_PORT: "{{ kubernetes_api_secure_port }}"
   K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
 # Containers section
@@ -196,6 +200,10 @@ spec:
       - name: zookeeper-logs
         hostPath:
           path: /var/log/contrail/zookeeper
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -233,13 +241,10 @@ spec:
             name: env
         - configMapRef:
             name: contrail-analytics-zookeeper
-        volumeMounts:
-        - mountPath: /tmp/kafka-logs
-          name: kafka-logs
-      volumes:
-      - name: kafka-logs
-        hostPath:
-          path: /var/lib/contrail/kafka-logs
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -287,6 +292,25 @@ spec:
       - name: analyticsdb-log
         hostPath:
           path: /var/log/contrail/analyticsdb
+      - name: contrail-analytics-nodemgr
+        image: "ci-repo.englab.juniper.net:5000/contrail-nodemgr:ocata-5.0-33"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        - configMapRef:
+            name: contrail-analytics-zookeeper
+        env:
+        - name: NODE_TYPE
+          value: analyticsdb
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -334,6 +358,10 @@ spec:
       - name: configdb-log
         hostPath:
           path: /var/log/contrail/configdb
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -386,6 +414,10 @@ spec:
       - name: analytics-zookeeper-datalog
         hostPath:
           path: /var/lib/analytics_zookeeper_datalog
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -506,6 +538,11 @@ spec:
         env:
         - name: NODE_TYPE
           value: analytics
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
@@ -518,6 +555,10 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -603,6 +644,11 @@ spec:
         env:
         - name: NODE_TYPE
           value: control
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
         volumeMounts:
         - mountPath: /var/log/contrail
           name: control-logs
@@ -617,6 +663,10 @@ spec:
           path: /var/run
       - name: dns-config
         emptyDir: {}
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -711,6 +761,11 @@ spec:
         env:
         - name: NODE_TYPE
           value: config
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
@@ -723,6 +778,10 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -780,6 +839,10 @@ spec:
       - name: webui-logs
         hostPath:
           path: /var/log/contrail/webui
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -830,6 +893,10 @@ spec:
       - name: redis-logs
         hostPath:
           path: /var/log/contrail/redis
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -881,6 +948,10 @@ spec:
       - name: rabbitmq-logs
         hostPath:
           path: /var/log/contrail/rabbitmq
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -933,6 +1004,10 @@ spec:
       - name: pod-secret
         secret:
           secretName: contrail-kube-manager-token
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -947,6 +1022,7 @@ spec:
       labels:
         app: contrail-agent
     spec:
+      #Disable affinity for single node setup
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -954,6 +1030,11 @@ spec:
             - matchExpressions:
               - key: "opencontrail.org/controller"
                 operator: DoesNotExist
+      #Enable tolerations for single node setup
+     # tolerations:
+     # - key: node-role.kubernetes.io/master
+     #   operator: Exists
+     #   effect: NoSchedule
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
@@ -993,6 +1074,10 @@ spec:
       - name: contrail-vrouter-agent
         image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
         imagePullPolicy: ""
+        # TODO: Priveleged mode is requied because w/o it the device /dev/net/tun
+        # is not present in the container. The mounting it into container
+        # doesnt help because of permissions are not enough syscalls,
+        # e.g. https://github.com/Juniper/contrail-controller/blob/master/src/vnsw/agent/contrail/linux/pkt0_interface.cc: 48.
         securityContext:
           privileged: true
         envFrom:
@@ -1024,6 +1109,11 @@ spec:
         env:
         - name: NODE_TYPE
           value: vrouter
+# todo: there is type Socket in new kubernetes, it is possible to use full
+# path:
+# hostPath:
+#   path: /var/run/docker.sock and
+#   type: Socket
         volumeMounts:
         - mountPath: /var/log/contrail
           name: agent-logs
@@ -1060,3 +1150,7 @@ spec:
       - name: agent-logs
         hostPath:
           path: /var/log/contrail/agent
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
