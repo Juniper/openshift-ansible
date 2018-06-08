@@ -210,49 +210,6 @@ spec:
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: kafka
-  namespace: kube-system
-  labels:
-    app: kafka
-spec:
-  template:
-    metadata:
-      labels:
-        app: kafka
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "opencontrail.org/controller"
-                operator: Exists
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
-      hostNetwork: true
-      containers:
-      - name: kafka
-        image: "{{ contrail_registry }}/contrail-external-kafka:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: env
-        - configMapRef:
-            name: contrail-analytics-zookeeper
-      imagePullSecrets:
-{% if contrail_registry_username is defined and contrail_registry_password %}
-      - name: contrail-registry-secret
-{% else %}        
-      - name: 
-{% endif %}
----
-apiVersion: extensions/v1beta1
-kind: DaemonSet
-metadata:
   name: contrail-analyticsdb
   namespace: kube-system
   labels:
@@ -466,19 +423,6 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
-      - name: contrail-analytics-alarm-gen
-        image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: env
-        - configMapRef:
-            name: contrail-analytics-zookeeper
-        volumeMounts:
-        - mountPath: /var/log/contrail
-          name: analytics-logs
       - name: contrail-analytics-query-engine
         image: "{{ contrail_registry }}/contrail-analytics-query-engine:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -494,19 +438,6 @@ spec:
           name: analytics-logs
       - name: contrail-analytics-snmp-collector
         image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: env
-        - configMapRef:
-            name: contrail-analytics-zookeeper
-        volumeMounts:
-        - mountPath: /var/log/contrail
-          name: analytics-logs
-      - name: contrail-analytics-topology
-        image: "{{ contrail_registry }}/contrail-analytics-topology:{{ contrail_container_tag }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
