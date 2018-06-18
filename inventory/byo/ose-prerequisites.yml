@@ -23,14 +23,14 @@
     - atomic-openshift-docker-excluder
     when:
     - deployment_type == "openshift-enterprise"
-    
+
   - name: Install docker-py
     command: pip install docker-py
     when:
     - deployment_type == "openshift-enterprise"
 
   - name: Install Docker
-    yum: name=docker-engine-1.12.6 state=present
+    yum: name=docker-engine state=present
 
   - name: Enable Docker Service
     service: name=docker enabled=yes
