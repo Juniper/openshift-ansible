@@ -23,7 +23,7 @@
     - atomic-openshift-docker-excluder
     when:
     - deployment_type == "openshift-enterprise"
-    
+
   - name: Install docker-py
     command: pip install docker-py
     when:
