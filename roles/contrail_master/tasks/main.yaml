@@ -95,6 +95,15 @@
       mode: 0644
     run_once: true
     when: contrail_version|int >= 5
+  
+  - name: Create Contrail single YAML file for Contrail 5.1
+    template:
+     src: contrail-installer-5.1.j2
+     dest: /tmp/contrail-installer.yaml
+     owner: root
+     mode: 0644
+    run_once: true
+    when: {{ contrail_version is version('5.0', '>') }}
 
   - name: Copy the wait for POD script to master node
     template:
