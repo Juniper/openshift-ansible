@@ -300,6 +300,9 @@ spec:
         env:
         - name: NODE_TYPE
           value: database
+        volumeMounts:
+        - mountPath: /mnt
+          name: docker-unix-socket
       volumes:
       - name: analyticsdb-data
         hostPath:
@@ -307,6 +310,9 @@ spec:
       - name: analyticsdb-log
         hostPath:
           path: /var/log/contrail/analyticsdb
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -971,7 +977,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "opencontrail.org/controller" 
+              - key: "opencontrail.org/controller"
                 operator: Exists
       tolerations:
       - key: node-role.kubernetes.io/master
