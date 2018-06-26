@@ -286,7 +286,7 @@ spec:
         - mountPath: /var/log/cassandra
           name: analyticsdb-log
       - name: contrail-analytics-nodemgr
-        image: "ci-repo.englab.juniper.net:5000/contrail-nodemgr:{{ contrail_container_tag }}"
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
         securityContext:
           privileged: true
