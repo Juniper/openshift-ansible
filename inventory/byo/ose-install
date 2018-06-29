@@ -31,7 +31,7 @@ openshift_use_contrail=true
 contrail_version=5.0
 contrail_container_tag=newton-5.0-40
 contrail_registry=ci-repo.englab.juniper.net:5000
-# Username /Password for private Docker regiteries 
+# Username /Password for private Docker regiteries
 #contrail_registry_username=test
 #contrail_registry_password=test
 contrail_nodes=10.87.65.48
