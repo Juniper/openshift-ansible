@@ -241,6 +241,13 @@ spec:
             name: env
         - configMapRef:
             name: contrail-analytics-zookeeper
+        volumeMounts:
+        - mountPath: /tmp/kafka-logs
+          name: kafka-logs
+      volumes:
+      - name: kafka-logs
+        hostPath:
+          path: /var/lib/contrail/kafka-logs
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -404,15 +411,15 @@ spec:
         - configMapRef:
             name: contrail-analytics-zookeeper
         volumeMounts:
-        - mountPath: /var/lib/zookeeper
-          name: zookeeper-data
-        - mountPath: /var/log/zookeeper
-          name: zookeeper-logs
-        volumeMounts:
         - mountPath: /data
           name: analytics-zookeeper-data
         - mountPath: /datalog
           name: analytics-zookeeper-datalog
+        volumeMounts:
+        - mountPath: /var/lib/zookeeper
+          name: zookeeper-data
+        - mountPath: /var/log/zookeeper
+          name: zookeeper-logs
       volumes:
       - name: analytics-zookeeper-data
         hostPath:
@@ -450,6 +457,23 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: contrail-config-zookeeper
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       containers:
       - name: contrail-analytics-api
         image: "{{ contrail_registry }}/contrail-analytics-api:{{ contrail_container_tag }}"
@@ -561,6 +585,9 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -591,6 +618,23 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: contrail-config-zookeeper
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       containers:
       - name: contrail-controller-control
         image: "{{ contrail_registry }}/contrail-controller-control-control:{{ contrail_container_tag }}"
@@ -669,6 +713,9 @@ spec:
           path: /var/run
       - name: dns-config
         emptyDir: {}
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -699,6 +746,23 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: contrail-config-zookeeper
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       containers:
       - name: contrail-controller-config-api
         image: "{{ contrail_registry }}/contrail-controller-config-api:{{ contrail_container_tag }}"
@@ -784,6 +848,9 @@ spec:
       - name: docker-unix-socket
         hostPath:
           path: /var/run
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -814,6 +881,23 @@ spec:
         operator: Exists
         effect: NoSchedule
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: contrail-config-zookeeper
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       containers:
       - name: contrail-controller-webui-job
         image: "{{ contrail_registry }}/contrail-controller-webui-job:{{ contrail_container_tag }}"
@@ -845,6 +929,9 @@ spec:
       - name: webui-logs
         hostPath:
           path: /var/log/contrail/webui
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -985,6 +1072,23 @@ spec:
         effect: NoSchedule
       automountServiceAccountToken: false
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: contrail-config-zookeeper
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       containers:
       - name: contrail-kube-manager
         image: "{{ contrail_registry }}/contrail-kubernetes-kube-manager:{{ contrail_container_tag }}"
@@ -1010,6 +1114,9 @@ spec:
       - name: pod-secret
         secret:
           secretName: contrail-kube-manager-token
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -1057,6 +1164,10 @@ spec:
           name: usr-src
         - mountPath: /lib/modules
           name: lib-modules
+        - mountPath: /etc/sysconfig/network-scripts
+          name: network-scripts
+        - mountPath: /host/bin
+          name: host-bin
       - name: contrail-kubernetes-cni-init
         image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -1090,6 +1201,12 @@ spec:
         - configMapRef:
             name: env
         volumeMounts:
+        - mountPath: /dev
+          name: dev
+        - mountPath: /etc/sysconfig/network-scripts
+          name: network-scripts
+        - mountPath: /host/bin
+          name: host-bin
         - mountPath: /var/log/contrail
           name: agent-logs
         - mountPath: /usr/src
@@ -1126,6 +1243,15 @@ spec:
         - mountPath: /mnt
           name: docker-unix-socket
       volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: network-scripts
+        hostPath:
+          path: /etc/sysconfig/network-scripts
+      - name: host-bin
+        hostPath:
+          path: /bin
       - name: docker-unix-socket
         hostPath:
           path: /var/run
@@ -1156,6 +1282,9 @@ spec:
       - name: agent-logs
         hostPath:
           path: /var/log/contrail/agent
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
