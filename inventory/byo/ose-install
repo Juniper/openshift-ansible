@@ -38,6 +38,7 @@ contrail_nodes=10.87.65.48
 vrouter_physical_interface=ens160
 contrail_vip=10.87.65.48
 vrouter_gateway=10.87.65.126
+#docker_version=1.13.1
 
 [masters]
 10.87.65.48 openshift_hostname=openshift-master
