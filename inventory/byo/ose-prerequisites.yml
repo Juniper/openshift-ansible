@@ -29,9 +29,17 @@
     when:
     - deployment_type == "openshift-enterprise"
 
-  - name: Install Docker
-    yum: name=docker-engine state=present
+  - fail:
+      msg: "Need a higher version of docker"
+    when:
+        - docker_version is defined 
+        - "{{ docker_version is version('1.13.1', '<') }}"
 
+  - name: install docker
+    yum:
+      name: "docker-{{ docker_version | default('1.13.1')}}"
+      state: installed
+  
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
