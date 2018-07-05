@@ -29,9 +29,23 @@
     when:
     - deployment_type == "openshift-enterprise"
 
-  - name: Install Docker
-    yum: name=docker-engine state=present
+  - name: create docker repo
+    yum_repository:
+      name: dockerrepo
+      description: Docker Repository
+      baseurl: https://yum.dockerproject.org/repo/main/centos/7
+      gpgkey: https://yum.dockerproject.org/gpg
+      gpgcheck: yes
 
+  - fail:
+      msg: "Need a higher version of docker"
+    when: "{{ docker_version | version_compare('1.13', '<') }}" 
+
+  - name: install docker
+    yum:
+      name: "docker-engine-{{ docker_version }}"
+      state: installed
+  
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
