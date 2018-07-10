@@ -78,6 +78,12 @@
       api_vip: "{{ groups.masters.0 | ipaddr }}"
     when: groups.lb is not defined
 
+  - name: Create kafka-logs folder with write permission
+    file:
+      path: /var/lib/contrail/kafka-logs/
+      mode: 0777
+      state: directory
+
   - name: Create Contrail single YAML file for Contrail 4.0
     template:
       src: contrail-installer-4.j2
