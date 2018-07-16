@@ -292,7 +292,7 @@ spec:
           name: analyticsdb-data
         - mountPath: /var/log/cassandra
           name: analyticsdb-log
-      - name: contrail-analytics-nodemgr
+      - name: contrail-analyticsdb-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
         securityContext:
@@ -303,7 +303,7 @@ spec:
         - configMapRef:
             name: nodemgr-config
         - configMapRef:
-            name: contrail-analytics-zookeeper
+            name: contrail-analyticsdb-config
         env:
         - name: NODE_TYPE
           value: database
@@ -364,6 +364,24 @@ spec:
           name: configdb-data
         - mountPath: /var/log/cassandra
           name: configdb-log
+      - name: contrail-configdb-nodemgr
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        - configMapRef:
+            name: contrail-configdb-config
+        env:
+        - name: NODE_TYPE
+          value: config-database
+        volumeMounts:
+        - mountPath: /mnt
+          name: docker-unix-socket
       volumes:
       - name: configdb-data
         hostPath:
@@ -371,6 +389,9 @@ spec:
       - name: configdb-log
         hostPath:
           path: /var/log/contrail/configdb
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -563,8 +584,6 @@ spec:
             name: env
         - configMapRef:
             name: nodemgr-config
-        - configMapRef:
-            name: contrail-analytics-zookeeper
         env:
         - name: NODE_TYPE
           value: analytics
@@ -679,7 +698,7 @@ spec:
           name: dns-config
         - mountPath: /var/log/contrail
           name: control-logs
-      - name: contrail-controller-nodemgr
+      - name: contrail-controller-control-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
         securityContext:
@@ -689,8 +708,6 @@ spec:
             name: env
         - configMapRef:
             name: nodemgr-config
-        - configMapRef:
-            name: contrail-config-zookeeper
         env:
         - name: NODE_TYPE
           value: control
@@ -826,8 +843,6 @@ spec:
             name: env
         - configMapRef:
             name: nodemgr-config
-        - configMapRef:
-            name: contrail-config-zookeeper
         env:
         - name: NODE_TYPE
           value: config
