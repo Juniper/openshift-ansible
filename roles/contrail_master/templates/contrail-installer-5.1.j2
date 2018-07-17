@@ -208,6 +208,42 @@ spec:
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
+  name: kafka
+  namespace: kube-system
+  labels:
+    app: kafka
+spec:
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "opencontrail.org/controller"
+                operator: Exists
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      hostNetwork: true
+      containers:
+      - name: kafka
+        image: "{{contrail_registry}}/contrail-external-kafka:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        env:
+        - name: NODE_TYPE
+          value: database
+        envFrom:
+        - configMapRef:
+            name: env
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
   name: contrail-analyticsdb
   namespace: kube-system
   labels:
@@ -474,6 +510,17 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+      - name: contrail-analytics-alarm-gen
+        image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{contrail_container_tag }}"
+        imagePullPolicy: ""
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /etc/contrail/ssl
+          name: ssl-certs
       - name: contrail-analytics-query-engine
         image: "{{ contrail_registry }}/contrail-analytics-query-engine:{{ contrail_container_tag }}"
         imagePullPolicy: ""
