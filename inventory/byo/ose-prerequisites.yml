@@ -24,6 +24,11 @@
     when:
     - deployment_type == "openshift-enterprise"
 
+  - name: unexclude docker packages
+    command: atomic-openshift-docker-excluder unexclude
+    when:
+    - deployment_type == "openshift-enterprise"
+
   - name: Install docker-py
     command: pip install docker-py
     when:
@@ -39,7 +44,12 @@
     yum:
       name: "docker-{{ docker_version | default('1.13.1')}}"
       state: installed
-  
+
+  - name: exclude docker packages
+    command: atomic-openshift-docker-excluder exclude
+    when:
+    - deployment_type == "openshift-enterprise"
+
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
