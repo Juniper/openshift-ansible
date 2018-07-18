@@ -17,13 +17,6 @@
     - psacct
     - ntp
 
-  - name: Install Openshift Enterprise package
-    yum: name="{{ item }}" state=present
-    with_items:
-    - atomic-openshift-docker-excluder
-    when:
-    - deployment_type == "openshift-enterprise"
-
   - name: Install docker-py
     command: pip install docker-py
     when:
@@ -39,7 +32,14 @@
     yum:
       name: "docker-{{ docker_version | default('1.13.1')}}"
       state: installed
-  
+
+  - name: Install Openshift Enterprise package
+    yum: name="{{ item }}" state=present
+    with_items:
+    - atomic-openshift-docker-excluder
+    when:
+    - deployment_type == "openshift-enterprise"
+
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
