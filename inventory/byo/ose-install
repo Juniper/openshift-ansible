@@ -1,7 +1,7 @@
 [OSEv3:children]
-masters
-nodes
-etcd
+openshift_masters
+openshift_nodes
+openshift_etcd
 openshift_ca
 
 [OSEv3:vars]
@@ -29,26 +29,31 @@ openshift_docker_insecure_registries=ci-repo.englab.juniper.net:5000
 
 openshift_use_contrail=true
 contrail_version=5.0
-contrail_container_tag=newton-5.0-40
+contrail_container_tag=ocata-5.0-122
 contrail_registry=ci-repo.englab.juniper.net:5000
 # Username /Password for private Docker regiteries
 #contrail_registry_username=test
 #contrail_registry_password=test
-contrail_nodes=10.87.65.48
-vrouter_physical_interface=ens160
-contrail_vip=10.87.65.48
+#vrouter_physical_interface=ens160
 vrouter_gateway=10.87.65.126
 #docker_version=1.13.1
 
-[masters]
+[openshift_masters]
 10.87.65.48 openshift_hostname=openshift-master
-
-[etcd]
-10.87.65.48 openshift_hostname=openshift-master
-
-[nodes]
-10.87.65.48 openshift_hostname=openshift-master
-10.87.65.49 openshift_hostname=openshift-slave
 
 [openshift_ca]
 10.87.65.48 openshift_hostname=openshift-master
+
+[contrail_masters]
+20.1.1.1 openshift_hostname=openshift-master
+
+[openshift_etcd]
+10.87.65.48 openshift_hostname=openshift-master
+
+[openshift_nodes]
+10.87.65.48 openshift_hostname=openshift-master
+10.87.65.49 openshift_hostname=openshift-slave
+
+[contrail_nodes]
+20.1.1.1 openshift_hostname=openshift-master
+20.1.1.2 openshift_hostname=openshift-slave
