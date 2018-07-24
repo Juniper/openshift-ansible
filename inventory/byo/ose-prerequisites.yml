@@ -1,4 +1,14 @@
 ---
+- hosts: localhost
+  tasks:
+  - name: check ansible version for ansible == 2.5.2
+    assert:
+        that:
+            - ansible_version.major == 2
+            - ansible_version.minor == 5
+            - ansible_version.revision == 2
+        msg: "You must install Ansible 2.5.2 to continue"
+
 - hosts: OSEv3
   tasks:
   - name: Install base packages
@@ -45,3 +55,6 @@
 
   - name: Start Docker Service
     service: name=docker state=started
+
+  - name: Start Ntp Service
+    service: name=ntpd state=started
