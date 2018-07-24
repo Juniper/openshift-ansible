@@ -7,16 +7,16 @@ metadata:
 data:
   global-config: |-
     [GLOBAL]
-    cloud_orchestrator = openshift 
+    cloud_orchestrator = openshift
     sandesh_ssl_enable = False
     enable_config_service = True
     enable_control_service = True
     enable_webui_service = True
     introspect_ssl_enable = False
-    config_nodes = {{ groups.masters | ipaddr | join(',') }} 
-    controller_nodes = {{ groups.masters | ipaddr | join(',') }} 
-    analytics_nodes = {{ groups.masters | ipaddr | join(',') }}
-    analyticsdb_nodes = {{ groups.masters | ipaddr | join(',') }}
+    config_nodes = {{ groups.contrail_masters | ipaddr | join(',') }}
+    controller_nodes = {{ groups.contrail_masters | ipaddr | join(',') }}
+    analytics_nodes = {{ groups.contrail_masters | ipaddr | join(',') }}
+    analyticsdb_nodes = {{ groups.contrail_masters | ipaddr | join(',') }}
     analyticsdb_minimum_diskgb = {{ analyticsdb_min_diskgb }}
     configdb_minimum_diskgb = {{ configdb_min_diskgb }}
     opscenter_ip = 1.1.1.1
