@@ -29,14 +29,12 @@ openshift_docker_insecure_registries=ci-repo.englab.juniper.net:5000
 
 openshift_use_contrail=true
 contrail_version=5.0
-contrail_container_tag=newton-5.0-40
+contrail_container_tag=ocata-5.0-156
 contrail_registry=ci-repo.englab.juniper.net:5000
 # Username /Password for private Docker regiteries
 #contrail_registry_username=test
 #contrail_registry_password=test
-contrail_nodes=10.87.65.48
-vrouter_physical_interface=ens160
-contrail_vip=10.87.65.48
+#vrouter_physical_interface=ens160
 vrouter_gateway=10.87.65.126
 #docker_version=1.13.1
 
@@ -52,3 +50,6 @@ vrouter_gateway=10.87.65.126
 
 [openshift_ca]
 10.87.65.48 openshift_hostname=openshift-master
+
+[contrail_masters]
+20.1.1.1 openshift_hostname=openshift-master
