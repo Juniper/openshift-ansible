@@ -1,4 +1,13 @@
 ---
+- hosts: localhost
+  tasks:
+  - name: check ansible version for ansible > 2.5
+    assert:
+        that:
+            - ansible_version.major >= 2
+            - ansible_version.minor >= 5
+        msg: "You must update Ansible to at least 2.5 to continue"
+
 - hosts: OSEv3
   tasks:
   - name: Install base packages
