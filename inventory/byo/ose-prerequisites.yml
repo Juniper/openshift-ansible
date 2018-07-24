@@ -1,4 +1,14 @@
 ---
+- hosts: localhost
+  tasks:
+  - name: check ansible version for ansible == 2.5.2
+    assert:
+        that:
+            - ansible_version.major == 2
+            - ansible_version.minor == 5
+            - ansible_version.revision == 2
+        msg: "You must install Ansible 2.5.2 to continue"
+
 - hosts: OSEv3
   tasks:
   - name: Install base packages
@@ -32,16 +42,19 @@
   - fail:
       msg: "Need a higher version of docker"
     when:
-        - docker_version is defined 
+        - docker_version is defined
         - "{{ docker_version is version('1.13.1', '<') }}"
 
   - name: install docker
     yum:
       name: "docker-{{ docker_version | default('1.13.1')}}"
       state: installed
-  
+ 
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
   - name: Start Docker Service
     service: name=docker state=started
+
+  - name: Start Ntp Service
+    service: name=ntpd state=started
