@@ -75,7 +75,7 @@
     when: groups.lb is defined
 
   - set_fact:
-      api_vip: "{{ groups.contrail_masters.0 | ipaddr }}"
+      api_vip: "{{ groups.masters.0 | ipaddr }}"
     when: groups.lb is not defined
 
   - name: Create kafka-logs folder with write permission
