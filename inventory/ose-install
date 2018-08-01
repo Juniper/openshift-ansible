@@ -23,7 +23,7 @@ openshift_hosted_manage_router=true
 openshift_enable_service_catalog=false
 openshift_use_openshift_sdn=false
 os_sdn_network_plugin_name='cni'
-openshift_disable_check=memory_availability,package_availability,disk_availability,package_version,docker_storage
+openshift_disable_check=memory_availability,package_availability,disk_availability,package_version,docker_storage,docker_image_availability
 openshift_docker_insecure_registries=ci-repo.englab.juniper.net:5000
 
 openshift_use_contrail=true
@@ -54,6 +54,19 @@ vrouter_gateway=10.87.65.126
 #public_fip_pool={}
 #vnc_endpoint_ip=20.1.1.1
 #vnc_endpoint_port=8082
+
+#Nested mode vars
+#nested_mode_contrail=true
+#auth_mode=keystone
+#keystone_auth_host=192.168.24.12
+#keystone_auth_admin_tenant=admin
+#keystone_auth_admin_user=admin
+#keystone_auth_admin_password=MAYffWrX7ZpPrV2AMAa9zAUvG
+#keystone_auth_admin_port=35357
+#keystone_auth_url_version=/v3
+#k8s_nested_vrouter_vip=1.1.1.1
+#k8s_vip=192.168.1.3
+#cluster_network="{'domain': 'default-domain', 'project': 'admin', 'name': 'net1'}"
 
 [masters]
 10.87.65.48 openshift_hostname=openshift-master
