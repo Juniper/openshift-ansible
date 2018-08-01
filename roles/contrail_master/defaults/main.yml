@@ -4,7 +4,7 @@ analyticsdb_min_diskgb: 50
 configdb_min_diskgb: 25
 aaa_mode: no-auth
 auth_mode: noaut
-CLOUD_ORCHESTRATOR: kubernetes
+CLOUD_ORCHESTRATOR: openshift
 LOG_LEVEL: SYS_NOTICE
 METADATA_PROXY_SECRET: contrail
 cloud_orchestrator: kubernetes
