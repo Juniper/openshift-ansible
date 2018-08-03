@@ -36,23 +36,26 @@
     load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
   with_items: "{{ image.results }}"
   when: contrail_version|int < 5
-  
+
 - name: Add iptable rules to open ports used by Contrail services
   command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
   with_items:
     - { port: '8085', service: 'contrail-vrouter-agent-introspect' }
     - { port: '9091', service: 'contrail-cni' }
 
+- name: Add iptable rules to open dns port
+  command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
+
 - when:
   - loopback.stat.exists == False
-  
+
   block:
   - name: Ensure CNI bin path exists
     file:
       path: "/opt/cni/bin"
       recurse: True
       state: directory
-      
+
   - name: Download & extract loopback CNI binary
     unarchive:
       src: "https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz"
