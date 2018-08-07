@@ -18,3 +18,4 @@ zookeeper_analytics_ports: 4888:5888
 vrouter_gateway:
 KUBERNETES_API_SECURE_PORT: 8443
 kubernetes_api_secure_port: 8443
+nested_mode_contrail: false
