@@ -1,0 +1,15 @@
+- project:
+    name: Juniper/openshift-ansible
+    check:
+      jobs:
+        - contrail-vnc-build-package-rhel7-ocata
+        - contrail-vnc-build-containers-rhel7-ocata:
+            dependencies:
+              - contrail-vnc-build-package-rhel7-ocata
+        - contrail-vnc-build-test-containers:
+            dependencies:
+              - contrail-vnc-build-package-rhel7-ocata
+        - contrail-sanity-rhel7-openshift-3.9:
+            dependencies:
+              - contrail-vnc-build-containers-rhel7-ocata
+              - contrail-vnc-build-test-containers
