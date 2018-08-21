@@ -451,8 +451,6 @@ spec:
         envFrom:
         - configMapRef:
             name: env
-        - configMapRef:
-            name: contrail-config-zookeeper
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
@@ -571,8 +569,6 @@ spec:
         envFrom:
         - configMapRef:
             name: env
-        - configMapRef:
-            name: contrail-config-zookeeper
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
@@ -697,8 +693,6 @@ spec:
         envFrom:
         - configMapRef:
             name: env
-        - configMapRef:
-            name: contrail-config-zookeeper
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
@@ -830,8 +824,6 @@ spec:
         envFrom:
         - configMapRef:
             name: env
-        - configMapRef:
-            name: contrail-config-zookeeper
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
@@ -1021,8 +1013,6 @@ spec:
         envFrom:
         - configMapRef:
             name: env
-        - configMapRef:
-            name: contrail-config-zookeeper
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
@@ -1088,6 +1078,20 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
+      - name: contrail-node-init
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        imagePullPolicy: ""
+        securityContext:
+          privileged: true
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        envFrom:
+        - configMapRef:
+            name: env
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
       - name: contrail-vrouter-kernel-init
         image: "{{ contrail_registry }}/contrail-vrouter-kernel-init:{{ contrail_container_tag }}"
         imagePullPolicy: ""
