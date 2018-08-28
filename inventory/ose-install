@@ -54,6 +54,7 @@ vrouter_gateway=10.87.65.126
 #public_fip_pool={}
 #vnc_endpoint_ip=20.1.1.1
 #vnc_endpoint_port=8082
+#contrail_controllers=20.1.1.1,30.1.1.1
 
 #Nested mode vars
 #nested_mode_contrail=true
@@ -80,7 +81,4 @@ vrouter_gateway=10.87.65.126
 
 [openshift_ca]
 10.87.65.48 openshift_hostname=openshift-master
-
-[contrail_masters]
-20.1.1.1 openshift_hostname=openshift-master
 
