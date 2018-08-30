@@ -1,26 +1,27 @@
 ---
-- name: Install ntp service on all nodes
-  hosts: all
-  yum:
-    name: "ntp"
-    state: installed
+- name: install ntp packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ntp
 
-- name: Start ntp service on all nodes
-  hosts: all
-  service: name=ntpd state=started
+- name: set ntp server
+  debugger: on_failed
+  template:
+    src: ntp.conf.j2
+    dest: /etc/ntp.conf
 
-- name: enable insecure_repos
-  hosts: all
-  lineinfile:
-        path: /etc/sysconfig/docker
-        line: "INSECURE_REGISTRY='--insecure-registry {{ contrail_registry }}'"
-  when:
-     - contrail_registry_insecure is defined
-     - contrail_registry_insecure | bool
+- name: start ntp service
+  service: name="{{ item }}" state=started enabled=yes
+  with_items:
+    - ntpd
 
-- name: restart docker service on all nodes
-  hosts: all
-  service: name=docker state=restarted
+- name: disable service chronyid
+  systemd:
+    name: chronyd
+    enabled: no
+  ignore_errors: yes
 
 - name: Stat for Contrail docker images
   stat:
