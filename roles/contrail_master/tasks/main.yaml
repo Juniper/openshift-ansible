@@ -1,5 +1,23 @@
 ---
 - block:
+  - name: Set master as ntp server if ntp_server is not specified
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - ntp
+    when: ntp_server is not defined
+
+  - name: start ntp service
+    service: name="{{ item }}" state=started enabled=yes
+    with_items:
+    - ntpd
+    when: ntp_server is not defined
+
+  - name: open ntp port 123 on masters
+    command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 123
+    when: ntp_server is not defined
+
   - name: Stat for Contrail docker images
     stat:
       path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
