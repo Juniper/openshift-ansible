@@ -2,138 +2,17 @@
 - name: Set ntp on nodes
   include_tasks: ntp.yml
 
-- name: Stat for Contrail docker images
-  stat:
-    path: "/tmp/{{ item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
-  register: image
-  with_items:
-  - contrail-agent
-  - contrail-kubernetes-agent
-  when: contrail_version|int < 5
+- name: Configure contrail controller
+  include_tasks: controller_config.yaml
 
-- name: Stat for loopback plugin
-  stat:
-    path: "/opt/cni/bin/loopback"
-  register: loopback
+- name: Configure all openshift nodes
+  include_tasks: node_config.yaml
 
-- name: Copy Contrail docker images file to remote host if not present
-  copy:
-    src: "{{ contrail_docker_images_path }}/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-    dest: "/tmp"
-  when: contrail_version|int < 5
-  with_items: "{{ image.results }}"
-
-- name: Untar Contrail docker images file
-  unarchive:
-    src: "/tmp/contrail-kubernetes-docker-images_{{ contrail_version }}.tgz"
-    dest: "/tmp"
-    remote_src: True
-  when: contrail_version|int < 5
-  with_items: "{{ image.results }}"
-
-- name: Set core dump pattern on node
-  command: echo "/var/crashes/core.%e.%p.%h.%t" > /proc/sys/kernel/core_pattern
-
-- name: Load Contrail docker images
-  docker_image:
-    name: "{{ item }}"
-    tag: "{{ contrail_version }}"
-    timeout: 300
-    load_path: "/tmp/{{ item.item }}-{{ contrail_os_release }}-{{ contrail_version }}.tar.gz"
-  with_items: "{{ image.results }}"
-  when: contrail_version|int < 5
-
-- name: Add iptable rules to open ports used by Contrail services
-  command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
-  with_items:
-    - { port: '8085', service: 'contrail-vrouter-agent-introspect' }
-    - { port: '9091', service: 'contrail-cni' }
-
-- name: Add iptable rules to open dns port
-  command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
-
-- when:
-  - loopback.stat.exists == False
-
-  block:
-  - name: Ensure CNI bin path exists
-    file:
-      path: "/opt/cni/bin"
-      recurse: True
-      state: directory
-
-  - name: Download & extract loopback CNI binary
-    unarchive:
-      src: "https://github.com/containernetworking/cni/releases/download/{{ cni_version }}/cni-{{ cni_version }}.tgz"
-      dest: "/opt/cni/bin"
-      mode: a+x
-      remote_src: True
-
-- name: Add Contrail service account to privileged scc
-  oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:contrail
-    resource_kind: scc
-    resource_name: privileged
-    state: present
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Add the daemonset-controller service account to privileged scc
-  oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:daemon-set-controller
-    resource_kind: scc
-    resource_name: privileged
-    state: present
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Label master nodes with opencontrail.org/controller=true
-  command: oc label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true
-  with_items: "{{ groups.masters }}"
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Label master nodes with node-role.kubernetes.io/compute=true
-  command: oc label nodes {{ hostvars[item]['openshift_hostname'] }} node-role.kubernetes.io/compute=true --overwrite=true
-  with_items: "{{ groups.masters }}"
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Label infra nodes with node-role.kubernetes.io/compute=true
-  command: oc label nodes --selector=region=infra node-role.kubernetes.io/compute=true --overwrite=true
-  with_items: "{{ groups.masters }}"
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Create Contrail registry secret
-  command: oc create secret docker-registry contrail-registry-secret --docker-server="{{ contrail_registry }}" --docker-username="{{ contrail_registry_username }}" --docker-password="{{ contrail_registry_password }}" --docker-email=contrail@helloworld.com -n kube-system
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-  when: contrail_registry_username is defined
-  ignore_errors: True
-
-- name: Make master schedulable
-  command: oadm manage-node {{ hostvars[item]['openshift_hostname'] }} --schedulable
-  with_items: "{{ groups.masters }}"
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-
-- name: Launch the Contrail installer
-  command: oc create -f /tmp/contrail-installer.yaml
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-  ignore_errors: True
-
-- name: Check Pods script to Master Node
-  command: /tmp/wait_for_pod.sh
-  register: command_result
-  failed_when: "'ERROR' in command_result.stdout"
-  run_once: True
-  delegate_to: "{{ contrail_master }}" 
-
-- name: Patch restricted scc
-  command: >
-    oc patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'
-  run_once: True
-  delegate_to: "{{ contrail_master }}"
-  ignore_errors: True
+# Note: we need to move below tasks to master later, we are calling 
+# here because of openshift-ansible design constraint
+- name: Configure the openshift master
+  hosts: groups.masters.0
+  include_role:
+      name: contrail_master
+      tasks_from: os_contrail_master.yaml
+  when: "{{ ansible_default_ipv4['address'] in groups.masters.0 }}"  
