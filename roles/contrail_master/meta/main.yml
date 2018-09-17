@@ -1,10 +1,10 @@
 ---
 galaxy_info:
-  author: Savithru Lokanath
+  author: Contrail 
   description: Contrail Networking
   company: Juniper Networks, Inc.
   license: Apache License, Version 2.0
-  min_ansible_version: 2.2
+  min_ansible_version: 2.5
   platforms:
   - name: EL
     versions:

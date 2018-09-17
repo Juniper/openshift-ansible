@@ -1,0 +1,68 @@
+---
+- name: Set contrail_masters var
+  set_fact:
+     contrail_masters: ""
+
+- name: Set contrail_masters from contrail_control_data_interface
+  set_fact:
+     contrail_masters: "{{ contrail_control_data_interface }}"
+  when:
+    - contrail_control_data_interface is defined
+
+- name: Set contrail_masters from infra nodes
+  set_fact:
+     contrail_masters: "{{ contrail_masters }} {{ item }}"
+  when:
+       - contrail_control_data_interface is not defined
+       - "{{ 'openshift_node_labels' in hostvars[item].keys() }}"
+       - "{{ 'region' in hostvars[item]['openshift_node_labels'] }}"
+       - "{{ 'infra' in hostvars[item]['openshift_node_labels']['region'] }}"
+  with_items: "{{ groups.nodes }}"
+
+- name: Set contrail_masters from masters group if not set before
+  set_fact:
+    contrail_masters: "{{ contrail_masters }} {{ item }}"
+  with_items: "{{ groups.masters }}"
+  when: "{{ contrail_masters.split() | length < 1 }}"
+
+- name: Add iptable rules to open ports used by Contrail services
+  command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
+  with_items:
+    - { port: '8082', service: 'contrail-config-api' }
+    - { port: '9100', service: 'contrail-config-api-backend' }
+    - { port: '8084', service: 'contrail-config-api-introspect' }
+    - { port: '8143', service: 'contrail-web-ui' }
+    - { port: '8080', service: 'contrail-web-ui-debug' }
+    - { port: '5269', service: 'contrail-control-xmpp' }
+    - { port: '8093', service: 'contrail-control-dns-xmpp' }
+    - { port: '8083', service: 'contrail-control-introspect' }
+    - { port: '8108', service: 'contrail-kubemanager-introspect' }
+    - { port: '8085', service: 'contrail-vrouter-introspect' }
+    - { port: '8092', service: 'contrail-control-introspect-dns' }
+    - { port: '8086', service: 'contrail-analytics-collector' }
+    - { port: '8081', service: 'contrail-analytics-api' }
+    - { port: '2181', service: 'zookeeper' }
+    - { port: '2182', service: 'zookeeper-analytics' }
+    - { port: '2888:3889', service: 'zookeeper' }
+    - { port: '4888:5888', service: 'zookeeper-analytics' }
+    - { port: '5672', service: 'rabbitmq' }
+    - { port: '6381', service: 'redis' }
+    - { port: '9092', service: 'kafka' }
+    - { port: '9041', service: 'cassandra' }
+    - { port: '9042', service: 'cassandra' }
+    - { port: '9160', service: 'cassandra' }
+    - { port: '9161', service: 'cassandra' }
+    - { port: '7000', service: 'cassandra' }
+    - { port: '7010', service: 'cassandra' }
+    - { port: '7199', service: 'cassandra' }
+    - { port: '7198', service: 'cassandra' }
+    - { port: '8443', service: 'ifmap' }
+  when: "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+
+- name: Create kafka-logs folder with write permission
+  file:
+    path: /var/lib/contrail/kafka-logs/
+    mode: 0777
+    state: directory
+  when: "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+
