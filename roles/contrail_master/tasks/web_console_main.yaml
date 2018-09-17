@@ -1,0 +1,13 @@
+---
+# do any asserts here
+
+- name: Open hosts network previledges for webconsole
+  command: oc adm policy add-scc-to-user hostnetwork -z webconsole -n openshift-web-console
+  run_once: True
+  ignore_errors: True
+
+- include_tasks: web_console_install.yml
+  when: openshift_web_console_install_contrail | default(true) | bool
+
+#- include_tasks: web_console_remove.yml
+#  when: not openshift_web_console_install_contrail | default(true) | bool
