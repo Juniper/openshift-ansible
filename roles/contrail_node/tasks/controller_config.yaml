@@ -57,7 +57,9 @@
     - { port: '7199', service: 'cassandra' }
     - { port: '7198', service: 'cassandra' }
     - { port: '8443', service: 'ifmap' }
-  when: "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+  when: 
+    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - not r_openshift_node_use_firewalld | default(false) | bool
 
 - name: Create kafka-logs folder with write permission
   file:
