@@ -11,6 +11,9 @@
 - name: Add iptable rules to open dns port
   command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
 
+- name: Save iptables rules
+  command: service iptables save
+
 - name: Stat for loopback plugin
   stat:
     path: "/opt/cni/bin/loopback"
