@@ -1211,10 +1211,8 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "node-role.kubernetes.io/compute"
-                operator: In
-                values:
-                  - "true"
+              - key: "node-role.kubernetes.io/master"
+                operator: NotExists
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
