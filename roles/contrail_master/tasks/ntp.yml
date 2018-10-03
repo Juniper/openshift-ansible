@@ -8,6 +8,8 @@
 
 - name: open ntp port 123 on masters
   command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 123
+  when:
+    - not r_openshift_node_use_firewalld | default(false) | bool
 
 - name: stop ntp service
   service: name="ntpd" state=stopped enabled=yes
