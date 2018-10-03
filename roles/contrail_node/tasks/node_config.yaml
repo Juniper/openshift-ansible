@@ -11,13 +11,28 @@
 - name: Add iptable rules to open dns port
   command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
 
+- name: Save iptables rules
+  command: service iptables save
+
 - name: Stat for loopback plugin
   stat:
     path: "/opt/cni/bin/loopback"
   register: loopback
 
+- name: set flag to install cni default to true
+  set_fact:
+    install_cni_binaries: "True"
+
+- name: set flag to install cni
+  set_fact:
+    install_cni_binaries: "False"
+  when:
+    - "{{ ansible_default_ipv4['address'] in groups.masters }}"
+    - "{{ ansible_default_ipv4['address'] not in contrail_masters }}"
+
 - when:
   - loopback.stat.exists == False
+  - install_cni_binaries | bool
 
   block:
   - name: Ensure CNI bin path exists
