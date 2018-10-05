@@ -71,10 +71,6 @@
     state: present
   run_once: True
 
-- name: Label master nodes with node-role.kubernetes.io/compute=true
-  command: oc label nodes {{ hostvars[item]['openshift_hostname'] }} node-role.kubernetes.io/compute=true --overwrite=true
-  with_items: "{{ groups.masters }}"
-
 - name: Label infra nodes with node-role.kubernetes.io/compute=true
   command: oc label nodes --selector=region=infra node-role.kubernetes.io/compute=true --overwrite=true
   run_once: True

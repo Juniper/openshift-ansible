@@ -16,3 +16,13 @@
       name: contrail_master
       tasks_from: os_contrail_master.yaml
   when: "{{ ansible_default_ipv4['address'] in groups.masters.0 }}"  
+
+- name: Web Console install
+  hosts: groups.masters.0
+  include_role:
+      name: contrail_master
+      tasks_from: web_console_install.yaml
+  when:
+    - openshift_web_console_contrail_install | default(false) | bool
+    - "{{ ansible_default_ipv4['address'] in groups.masters.0 }}"
+  run_once: True
