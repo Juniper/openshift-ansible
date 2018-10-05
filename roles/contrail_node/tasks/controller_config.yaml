@@ -59,6 +59,13 @@
     - { port: '8443', service: 'ifmap' }
   when: "{{ ansible_default_ipv4['address'] in contrail_masters }}"
 
+- name: Open openshift contrail customized web console port
+  command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport 18443 -j ACCEPT -m comment --comment "openshift-contrail-webconsole"
+  when:
+    - not r_openshift_node_use_firewalld | default(false) | bool
+    - openshift_web_console_contrail_install | default(false) | bool
+    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+
 - name: Create kafka-logs folder with write permission
   file:
     path: /var/lib/contrail/kafka-logs/
