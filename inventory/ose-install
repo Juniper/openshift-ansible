@@ -28,6 +28,10 @@ openshift_docker_insecure_registries=ci-repo.englab.juniper.net:5010
 openshift_web_console_install=false
 #openshift_web_console_nodeselector={'region':'infra'}
 
+# Customized openshift web console with contrail
+openshift_web_console_contrail_install=true
+openshift_web_console_contrail_nodeselector={'region':'infra'}
+
 openshift_use_contrail=true
 contrail_version=5.0
 contrail_container_tag=rhel-5.0-214
