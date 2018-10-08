@@ -7,22 +7,3 @@
 
 - name: Configure all openshift nodes
   include_tasks: node_config.yaml
-
-# Note: we need to move below tasks to master later, we are calling
-# here because of openshift-ansible design constraint
-- name: Configure the openshift master
-  hosts: groups.masters.0
-  include_role:
-      name: contrail_master
-      tasks_from: os_contrail_master.yaml
-  when: "{{ ansible_default_ipv4['address'] in groups.masters.0 }}"
-
-- name: Web Console install
-  hosts: groups.masters.0
-  include_role:
-      name: contrail_master
-      tasks_from: web_console_install.yaml
-  when:
-    - openshift_web_console_contrail_install | default(false) | bool
-    - "{{ ansible_default_ipv4['address'] in groups.masters.0 }}"
-  run_once: True

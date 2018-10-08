@@ -7,6 +7,17 @@
     api_vip: "{{ groups.masters.0 | ipaddr }}"
   when: groups.lb is not defined
 
+- name: Create the agent template file
+  template:
+    src: contrail-agent-installer-5.j2
+    dest: /tmp/contrail-agent-installer.yaml
+    owner: root
+    mode: 0644
+  run_once: true
+  when:
+     - "{{ contrail_version is version('5.0', '>=') }}"
+     - "{{ contrail_version is version('5.1', '<') }}"
+
 - name: Create Contrail single YAML file for Contrail 4.0
   template:
     src: contrail-installer-4.j2
@@ -84,6 +95,21 @@
   run_once: True
   when: contrail_registry_username is defined
   ignore_errors: True
+
+- name: Starting the agent pod on required nodes
+  command: oc create -f /tmp/contrail-agent-installer.yaml
+  run_once: True
+  ignore_errors: True
+  when:
+     - "{{ contrail_version is version('5.0', '>=') }}"
+     - "{{ contrail_version is version('5.1', '<') }}"
+
+
+- name: Check Pods script to Master Node
+  command: /tmp/wait_for_pod.sh
+  register: command_result
+  failed_when: "'ERROR' in command_result.stdout"
+  run_once: True
 
 - name: Launch the Contrail installer
   command: oc create -f /tmp/contrail-installer.yaml
