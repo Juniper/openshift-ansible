@@ -1,8 +1,3 @@
 ---
 - name: Creating the containers
   include_tasks: os_contrail_master.yaml
-
-- name: Web Console install
-  include_tasks: web_console_install.yaml
-  when:
-    - openshift_web_console_contrail_install | default(false) | bool

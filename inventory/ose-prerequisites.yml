@@ -26,6 +26,8 @@
     - sos
     - psacct
     - ntp
+    - NetworkManager
+    - python-netaddr
 
   - name: Install Openshift Enterprise package
     yum: name="{{ item }}" state=present
@@ -53,8 +55,14 @@
   - name: Enable Docker Service
     service: name=docker enabled=yes
 
+  - name: Check NetworkManager enabled
+    service: name=NetworkManager enabled=yes
+
   - name: Start Docker Service
     service: name=docker state=started
+
+  - name: Start NetworkManager
+    service: name=NetworkManager state=started
 
   - name: Start Ntp Service
     service: name=ntpd state=started

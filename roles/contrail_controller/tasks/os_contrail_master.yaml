@@ -135,10 +135,18 @@
   failed_when: "'ERROR' in command_result.stdout"
   run_once: True
 
+- name: sleep for 180 seconds and continue with play
+  wait_for: timeout=180
+  delegate_to: localhost
+
 - name: Launch the Contrail installer
   command: oc create -f /tmp/contrail-installer.yaml
   run_once: True
   ignore_errors: True
+
+- name: sleep for 300 seconds and continue with play
+  wait_for: timeout=300
+  delegate_to: localhost
 
 - name: Check Pods script to Master Node
   command: /tmp/wait_for_pod.sh
