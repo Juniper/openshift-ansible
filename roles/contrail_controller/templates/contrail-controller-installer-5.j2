@@ -47,14 +47,6 @@ type: kubernetes.io/service-account-token
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nodemgr-config
-  namespace: kube-system
-data:
-  DOCKER_HOST: "unix://mnt/docker.sock"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: kube-manager-config
   namespace: kube-system
 data:
@@ -80,164 +72,6 @@ data:
   KUBERNETES_API_SERVER: {{ kubernetes_api_server | default(api_vip | ipaddr) }}
   KUBERNETES_API_PORT: "{{ kubernetes_api_secure_port | default('8443') }}"
   K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
----
-apiVersion: extensions/v1beta1
-kind: DaemonSet
-metadata:
-  name: contrail-database-nodemgr
-  namespace: kube-system
-  labels:
-    app: contrail-database-nodemgr
-spec:
-  template:
-    metadata:
-      labels:
-        app: contrail-database-nodemgr
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "opencontrail.org/controller"
-                operator: Exists
-      hostNetwork: true
-      initContainers:
-      - name: contrail-node-init
-        image: "{{contrail_registry}}/contrail-node-init:{{contrail_container_tag}}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        env:
-        - name: CONTRAIL_STATUS_IMAGE
-          value: "{{contrail_registry}}/contrail-status:{{contrail_container_tag}}"
-        envFrom:
-        - configMapRef:
-            name: env
-        volumeMounts:
-        - mountPath: /host/usr/bin
-          name: host-usr-bin
-      containers:
-      - name: contrail-database-nodemgr
-        image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: env
-        - configMapRef:
-            name: nodemgr-config
-        - configMapRef:
-            name: contrail-analyticsdb-config
-        env:
-        - name: NODE_TYPE
-          value: database
-        - name: DATABASE_NODEMGR__DEFAULTS__minimum_diskGB
-          value: "2"
-# todo: there is type Socket in new kubernetes, it is possible to use full
-# path:
-# hostPath:
-#   path: /var/run/docker.sock and
-#   type: Socket
-        volumeMounts:
-        - mountPath: /var/log/contrail
-          name: analyticsdb-logs
-        - mountPath: /mnt
-          name: docker-unix-socket
-      volumes:
-      - name: analyticsdb-logs
-        hostPath:
-          path: /var/log/contrail/analyticsdb
-      - name: docker-unix-socket
-        hostPath:
-          path: /var/run
-      - name: host-usr-bin
-        hostPath:
-          path: /usr/bin
-{% if contrail_registry_username is defined and contrail_registry_password %}
-      imagePullSecrets:
-      - name: contrail-registry-secret
-{% endif %}
----
-apiVersion: extensions/v1beta1
-kind: DaemonSet
-metadata:
-  name: contrail-config-database-nodemgr
-  namespace: kube-system
-  labels:
-    app: contrail-config-database-nodemgr
-spec:
-  template:
-    metadata:
-      labels:
-        app: contrail-config-database-nodemgr
-    spec:
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "opencontrail.org/controller"
-                operator: Exists
-      hostNetwork: true
-      initContainers:
-      - name: contrail-node-init
-        image: "{{contrail_registry}}/contrail-node-init:{{contrail_container_tag}}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        env:
-        - name: CONTRAIL_STATUS_IMAGE
-          value: "{{contrail_registry}}/contrail-status:{{contrail_container_tag}}"
-        envFrom:
-        - configMapRef:
-            name: env
-        volumeMounts:
-        - mountPath: /host/usr/bin
-          name: host-usr-bin
-      containers:
-      - name: contrail-config-database-nodemgr
-        image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
-        imagePullPolicy: ""
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: env
-        - configMapRef:
-            name: nodemgr-config
-        - configMapRef:
-            name: contrail-configdb-config
-        env:
-        - name: NODE_TYPE
-          value: config-database
-        - name: CONFIG_DATABASE_NODEMGR__DEFAULTS__minimum_diskGB
-          value: "2"
-# todo: there is type Socket in new kubernetes, it is possible to use full
-# path:
-# hostPath:
-#   path: /var/run/docker.sock and
-#   type: Socket
-        volumeMounts:
-        - mountPath: /var/log/contrail
-          name: configdb-logs
-        - mountPath: /mnt
-          name: docker-unix-socket
-      volumes:
-      - name: configdb-logs
-        hostPath:
-          path: /var/log/contrail/configdb
-      - name: docker-unix-socket
-        hostPath:
-          path: /var/run
-      - name: host-usr-bin
-        hostPath:
-          path: /usr/bin
-{% if contrail_registry_username is defined and contrail_registry_password %}
-      imagePullSecrets:
-      - name: contrail-registry-secret
-{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -694,9 +528,13 @@ spec:
             name: env
         - configMapRef:
             name: configzookeeperenv
+        - configMapRef:
+            name: kubernetes-config
         volumeMounts:
         - mountPath: /var/log/contrail
           name: webui-logs
+        - mountPath: /tmp/serviceaccount
+          name: ssl-secret-gen-token
       - name: contrail-controller-webui-web
         image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -799,5 +637,3 @@ spec:
       - name: contrail-registry-secret
 {% endif %}
 ---
-
-

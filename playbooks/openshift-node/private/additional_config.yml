@@ -83,3 +83,16 @@
   roles:
     - role: contrail_controller
       when: openshift_use_contrail | default(false) | bool
+
+- name: Configure Contrail ST
+  hosts: oo_nodes_use_contrail
+  roles:
+  - role: contrail_st
+    when: openshift_use_contrail | default(false) | bool
+
+- name: Install Contrail Customized Web Console
+  hosts: oo_first_master
+  roles:
+    - role: contrail_web_console
+      when: openshift_use_contrail | default(false) | bool
+
