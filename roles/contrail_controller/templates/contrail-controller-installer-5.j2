@@ -123,6 +123,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-collector
         image: "{{ contrail_registry }}/contrail-analytics-collector:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -136,6 +138,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-alarm-gen
         image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -149,6 +153,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-query-engine
         image: "{{ contrail_registry }}/contrail-analytics-query-engine:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -162,6 +168,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-snmp-collector
         image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -175,6 +183,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-topology
         image: "{{ contrail_registry }}/contrail-analytics-topology:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -188,6 +198,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-analytics-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -211,6 +223,8 @@ spec:
           name: analytics-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: analytics-logs
         hostPath:
@@ -221,6 +235,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -276,6 +293,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: control-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-control-dns
         image: "{{ contrail_registry }}/contrail-controller-control-dns:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -289,6 +308,8 @@ spec:
           name: dns-config
         - mountPath: /var/log/contrail
           name: control-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-control-named
         image: "{{ contrail_registry }}/contrail-controller-control-named:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -306,6 +327,8 @@ spec:
           name: dns-config
         - mountPath: /var/log/contrail
           name: control-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-control-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -331,6 +354,8 @@ spec:
           name: control-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: control-logs
         hostPath:
@@ -343,6 +368,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -398,6 +426,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-config-devicemgr
         image: "{{ contrail_registry }}/contrail-controller-config-devicemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -411,6 +441,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-config-schema
         image: "{{ contrail_registry }}/contrail-controller-config-schema:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -424,6 +456,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-config-svcmonitor
         image: "{{ contrail_registry }}/contrail-controller-config-svcmonitor:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -437,6 +471,8 @@ spec:
         volumeMounts:
         - mountPath: /var/log/contrail
           name: config-logs
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-config-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -466,6 +502,8 @@ spec:
           name: config-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: config-logs
         hostPath:
@@ -476,6 +514,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -535,6 +576,8 @@ spec:
           name: webui-logs
         - mountPath: /tmp/serviceaccount
           name: ssl-secret-gen-token
+        - mountPath: /etc/localtime
+          name: localtime
       - name: contrail-controller-webui-web
         image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -552,6 +595,8 @@ spec:
           name: webui-logs
         - mountPath: /tmp/serviceaccount
           name: ssl-secret-gen-token
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: webui-logs
         hostPath:
@@ -562,6 +607,9 @@ spec:
       - name: ssl-secret-gen-token
         secret:
           secretName: contrail-kubernetes-token
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -622,6 +670,8 @@ spec:
           name: kube-manager-logs
         - mountPath: /tmp/serviceaccount
           name: pod-secret
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: kube-manager-logs
         hostPath:
@@ -632,6 +682,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret

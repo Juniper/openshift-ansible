@@ -214,6 +214,8 @@ spec:
           name: configdb-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: configdb-logs
         hostPath:
@@ -224,6 +226,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -451,6 +456,8 @@ spec:
           name: analyticsdb-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime
+          name: localtime
       volumes:
       - name: analyticsdb-logs
         hostPath:
@@ -461,6 +468,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret

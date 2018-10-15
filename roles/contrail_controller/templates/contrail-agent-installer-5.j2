@@ -139,6 +139,8 @@ spec:
           name: var-lib-contrail
         - mountPath: /var/crashes
           name: var-crashes
+        - mountPath: /etc/localtime 
+          name: localtime 
       - name: contrail-agent-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: ""
@@ -162,6 +164,8 @@ spec:
           name: agent-logs
         - mountPath: /mnt
           name: docker-unix-socket
+        - mountPath: /etc/localtime 
+          name: localtime 
       volumes:
       - name: dev
         hostPath:
@@ -202,6 +206,9 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: localtime 
+        hostPath:
+          path: /etc/localtime
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
