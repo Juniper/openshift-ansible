@@ -94,21 +94,21 @@
   run_once: True
 
 - name: Label infra nodes with node-role.kubernetes.io/compute=true
-  command: oc label nodes --selector=region=infra node-role.kubernetes.io/compute=true --overwrite=true
+  command: "{{ openshift_client_binary }} label nodes --selector=region=infra node-role.kubernetes.io/compute=true --overwrite=true"
   run_once: True
 
 - name: Label contrail master nodes with opencontrail.org/controller=true
-  command: oc label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true
+  command: "{{ openshift_client_binary }} label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true"
   with_items: "{{ contrail_masters.split() }}"
 
 - name: Create Contrail registry secret
-  command: oc create secret docker-registry contrail-registry-secret --docker-server="{{ contrail_registry }}" --docker-username="{{ contrail_registry_username }}" --docker-password="{{ contrail_registry_password }}" --docker-email=contrail@helloworld.com -n kube-system
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n kube-system"
   run_once: True
   when: contrail_registry_username is defined
   ignore_errors: True
 
 - name: Starting the agent pod on required nodes
-  command: oc create -f /tmp/contrail-agent-installer.yaml
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-agent-installer.yaml"
   run_once: True
   ignore_errors: True
   when:
@@ -122,7 +122,7 @@
   run_once: True
 
 - name: Starting the infrastructure pods on required nodes
-  command: oc create -f /tmp/contrail-infra-installer.yaml
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-infra-installer.yaml"
   run_once: True
   ignore_errors: True
   when:
@@ -140,7 +140,7 @@
   delegate_to: localhost
 
 - name: Launch the Contrail installer
-  command: oc create -f /tmp/contrail-installer.yaml
+  command: "{{ openshift_client_binary }} create -f /tmp/contrail-installer.yaml"
   run_once: True
   ignore_errors: True
 
@@ -156,6 +156,6 @@
 
 - name: Patch restricted scc
   command: >
-    oc patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'
+    "{{ openshift_client_binary }} patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'"
   run_once: True
   ignore_errors: True
