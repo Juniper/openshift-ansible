@@ -13,7 +13,7 @@ RETRY=100
 RETRY_DELAY=5
 while [ "$POD_RETRY_COUNT" -lt "$RETRY" ]; do
   POD_RETRY_COUNT=$((POD_RETRY_COUNT+1))
-  POD_STATUS=`oc get pods --no-headers --namespace $NAMESPACE`
+  POD_STATUS=`{{ openshift_client_binary }} get pods --no-headers --namespace $NAMESPACE`
   if [ -z "$POD_STATUS" ];then
     echo "INFO: No pods found for this release, retrying after sleep"
     POD_RETRY_COUNT=$((POD_RETRY_COUNT+1))
@@ -29,7 +29,7 @@ while [ "$POD_RETRY_COUNT" -lt "$RETRY" ]; do
 
     CONTAINER_RETRY_COUNT=0
     while [ "$CONTAINER_RETRY_COUNT" -lt "$RETRY" ]; do
-      UNREADY_CONTAINERS=`oc get pods --namespace $NAMESPACE \
+      UNREADY_CONTAINERS=`{{ openshift_client_binary }} get pods --namespace $NAMESPACE \
         -o jsonpath="{.items[*].status.containerStatuses[?(@.ready!=true)].name}"`
       if [ -n "$UNREADY_CONTAINERS" ];then
         echo "INFO: Some containers are not yet ready; retrying after sleep"
@@ -48,7 +48,7 @@ if [ "$PODS_FOUND" -eq 0 ];then
   echo "WARN: No pods launched by this chart's default settings"
   exit 0
 else
-  POD_FAILED=`oc get pods --no-headers --namespace kube-system | grep -v Running | cut -d " " -f1`
+  POD_FAILED=`{{ openshift_client_binary }} get pods --no-headers --namespace kube-system | grep -v Running | cut -d " " -f1`
   echo "ERROR: Some containers failed to reach the ready state"
   echo ERROR  POD $POD_FAILED is not ready
   exit 1
