@@ -3,23 +3,23 @@
   command: /usr/bin/contrail-status
   register: contrail_status_output
   when:
-    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - "{{ inventory_hostname in contrail_masters }}"
 
 - set_fact:
     schema_valid: true
   when:
-    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - "{{ inventory_hostname in contrail_masters }}"
 
 - name: If Schema Transformer is not in active or backup state, mark it as being in invalid state.
   set_fact:
     schema_valid: false
   when:
-    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - "{{ inventory_hostname in contrail_masters }}"
     - '"schema: active" not in contrail_status_output.stdout'
     - '"schema: backup" not in contrail_status_output.stdout'
 
 - when:
-  - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+  - "{{ inventory_hostname in contrail_masters }}"
   - not schema_valid
 
   # Schema Transformer is invalid.
