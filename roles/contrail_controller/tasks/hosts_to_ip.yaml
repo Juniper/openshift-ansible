@@ -1,0 +1,22 @@
+---
+- name: install dnspython module
+  pip:
+    name: dnspython
+    state: present
+
+- set_fact:
+    contrail_masters_ip: ""
+
+- set_fact:
+    contrail_masters_ip: "{{ contrail_masters_ip }} {{ lookup('dig', item) }}"
+  when: lookup('dig', item) | ipaddr
+  with_items: "{{ contrail_masters.split() }}"
+
+- set_fact:
+    contrail_masters_ip: "{{ contrail_masters_ip }} {{ item }}"
+  when: not lookup('dig', item) | ipaddr
+  with_items: "{{ contrail_masters.split() }}"
+
+- name: Now retrieve list of contrail masters ip
+  set_fact:
+    contrail_masters: "{{ contrail_masters_ip }}"
