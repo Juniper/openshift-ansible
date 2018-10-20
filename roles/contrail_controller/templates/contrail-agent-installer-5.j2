@@ -6,24 +6,24 @@ metadata:
   namespace: kube-system
 data:
   AAA_MODE: {{ aaa_mode }}
-  ANALYTICS_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  ANALYTICSDB_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  ANALYTICS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICSDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   AUTH_MODE: {{ auth_mode }}
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
-  CONFIG_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONFIGDB_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONTROL_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONTROLLER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  KAFKA_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONFIGDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROL_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  KAFKA_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   LOG_LEVEL: {{ log_level }}
   METADATA_PROXY_SECRET: {{ metadata_proxy_secret }}
   PHYSICAL_INTERFACE: {{ vrouter_physical_interface | default('') }}
-  RABBITMQ_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
-  REDIS_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  REDIS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   VROUTER_GATEWAY: {{ vrouter_gateway }}
-  WEBUI_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  ZOOKEEPER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  WEBUI_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
