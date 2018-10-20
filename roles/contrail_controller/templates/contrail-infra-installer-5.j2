@@ -11,24 +11,24 @@ metadata:
   namespace: kube-system
 data:
   AAA_MODE: {{ aaa_mode }}
-  ANALYTICS_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  ANALYTICSDB_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  ANALYTICS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICSDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   AUTH_MODE: {{ auth_mode }}
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
-  CONFIG_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONFIGDB_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONTROL_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONTROLLER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  KAFKA_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONFIGDB_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROL_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  KAFKA_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   LOG_LEVEL: {{ log_level }}
   METADATA_PROXY_SECRET: {{ metadata_proxy_secret }}
   PHYSICAL_INTERFACE: {{ vrouter_physical_interface | default('') }}
-  RABBITMQ_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
-  REDIS_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  REDIS_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   VROUTER_GATEWAY: {{ vrouter_gateway }}
-  WEBUI_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  ZOOKEEPER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  WEBUI_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -38,7 +38,7 @@ metadata:
 data:
   ZOOKEEPER_PORT: "{{ zookeeper_port }}"
   ZOOKEEPER_PORTS: "{{ zookeeper_ports }}"
-  ZOOKEEPER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -48,7 +48,7 @@ metadata:
 data:
   ZOOKEEPER_PORT: "{{ zookeeper_analytics_port }}"
   ZOOKEEPER_PORTS: "{{ zookeeper_analytics_ports }}"
-  ZOOKEEPER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -56,7 +56,7 @@ metadata:
   name: contrail-analyticsdb-config
   namespace: kube-system
 data:
-  CASSANDRA_SEEDS: {{ contrail_masters.split() | ipaddr | join(',') }}
+  CASSANDRA_SEEDS: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   CASSANDRA_CLUSTER_NAME: Contrail
   CASSANDRA_START_RPC: "true"
   CASSANDRA_LISTEN_ADDRESS: auto
@@ -72,7 +72,7 @@ metadata:
   name: contrail-configdb-config
   namespace: kube-system
 data:
-  CASSANDRA_SEEDS: {{ contrail_masters.split() | ipaddr | join(',') }}
+  CASSANDRA_SEEDS: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   CASSANDRA_CLUSTER_NAME: ContrailConfigDB
   CASSANDRA_START_RPC: "true"
   CASSANDRA_LISTEN_ADDRESS: auto
@@ -88,7 +88,7 @@ metadata:
   name: rabbitmq-config
   namespace: kube-system
 data:
-  RABBITMQ_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
   RABBITMQ_ERLANG_COOKIE: "47EFF3BB-4786-46E0-A5BB-58455B3C2CB4"
 ---

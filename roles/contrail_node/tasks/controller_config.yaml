@@ -1,30 +1,4 @@
 ---
-- name: Set contrail_masters var
-  set_fact:
-     contrail_masters: ""
-
-- name: Set contrail_masters from contrail_control_data_interface
-  set_fact:
-     contrail_masters: "{{ contrail_control_data_interface }}"
-  when:
-    - contrail_control_data_interface is defined
-
-- name: Set contrail_masters from infra nodes
-  set_fact:
-     contrail_masters: "{{ contrail_masters }} {{ item }}"
-  when:
-       - contrail_control_data_interface is not defined
-       - "{{ 'openshift_node_labels' in hostvars[item].keys() }}"
-       - "{{ 'region' in hostvars[item]['openshift_node_labels'] }}"
-       - "{{ 'infra' in hostvars[item]['openshift_node_labels']['region'] }}"
-  with_items: "{{ groups.nodes }}"
-
-- name: Set contrail_masters from masters group if not set before
-  set_fact:
-    contrail_masters: "{{ contrail_masters }} {{ item }}"
-  with_items: "{{ groups.masters }}"
-  when: "{{ contrail_masters.split() | length < 1 }}"
-
 - name: Add iptable rules to open ports used by Contrail services
   command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
   with_items:
@@ -61,7 +35,7 @@
     - { port: '4369', service: 'rabbit-ha-port' }
     - { port: '25672', service: 'rabbit-ha-port' }
   when:
-    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - "{{ ansible_default_ipv4['address'] in contrail_masters_ip }}"
     - not r_openshift_node_use_firewalld | default(false) | bool
 
 - name: Open openshift contrail customized web console port
@@ -69,12 +43,12 @@
   when:
     - not r_openshift_node_use_firewalld | default(false) | bool
     - openshift_web_console_contrail_install | default(false) | bool
-    - "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+    - "{{ ansible_default_ipv4['address'] in contrail_masters_ip }}"
 
 - name: Create kafka-logs folder with write permission
   file:
     path: /var/lib/contrail/kafka-logs/
     mode: 0777
     state: directory
-  when: "{{ ansible_default_ipv4['address'] in contrail_masters }}"
+  when: "{{ ansible_default_ipv4['address'] in contrail_masters_ip }}"
 
