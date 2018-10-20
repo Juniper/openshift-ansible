@@ -1,4 +1,8 @@
 ---
+- name: Get contrail nodes and ips
+  include_role:
+    name: contrail_common
+
 - name: Web Console install
   include_tasks: web_console_install.yaml
   when:
