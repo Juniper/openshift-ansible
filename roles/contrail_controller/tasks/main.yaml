@@ -1,3 +1,6 @@
 ---
+- name: Convert host names to ip
+  include_tasks: hosts_to_ip.yaml
+
 - name: Creating the containers
   include_tasks: os_contrail_master.yaml
