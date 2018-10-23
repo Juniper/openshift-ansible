@@ -121,6 +121,11 @@
   failed_when: "'ERROR' in command_result.stdout"
   run_once: True
 
+- name: Restart dnsmasq
+  service: name="dnsmasq" state=restarted enabled=yes
+  delegate_to: "{{ item }}"
+  with_items: "{{ contrail_masters.split() }}"
+
 - name: Starting the infrastructure pods on required nodes
   command: "{{ openshift_client_binary }} create -f /tmp/contrail-infra-installer.yaml"
   run_once: True
