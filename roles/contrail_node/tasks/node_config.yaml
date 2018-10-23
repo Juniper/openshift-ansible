@@ -2,19 +2,6 @@
 - name: Set core dump pattern on node
   command: echo "/var/crashes/core.%e.%p.%h.%t" > /proc/sys/kernel/core_pattern
 
-- name: Add iptable rules to open ports used by Contrail services
-  command: iptables -I OS_FIREWALL_ALLOW 1 -p tcp --dport "{{ item.port }}" -j ACCEPT -m comment --comment "{{ item.service }}"
-  with_items:
-    - { port: '8085', service: 'contrail-vrouter-agent-introspect' }
-    - { port: '9091', service: 'contrail-cni' }
-  when:
-    - not r_openshift_node_use_firewalld | default(false) | bool
-
-- name: Add iptable rules to open dns port
-  command: iptables -I INPUT 4 -j ACCEPT -p udp --dport 53
-  when:
-    - not r_openshift_node_use_firewalld | default(false) | bool
-
 - name: Save iptables rules
   command: service iptables save
 

@@ -497,6 +497,21 @@ spec:
               - key: "opencontrail.org/controller"
                 operator: Exists
       hostNetwork: true
+      initContainers:
+      - name: contrail-node-create-kafka-dir
+        image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
+        command: ["mkdir","-pm","777","/host/var/lib/contrail/kafka-logs"]
+        imagePullPolicy: "IfNotPresent"
+        env:
+        - name: CONTRAIL_STATUS_IMAGE
+          value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        securityContext:
+        privileged: true
+        volumeMounts:
+        - mountPath: /host/usr/bin
+          name: host-usr-bin
+        - mountPath: /host/var/lib
+          name: host-var-lib
       containers:
       - name: kafka
         image: "{{ contrail_registry }}/contrail-external-kafka:{{ contrail_container_tag }}"
@@ -518,6 +533,12 @@ spec:
       - name: kafka-logs
         hostPath:
           path: /var/lib/contrail/kafka-logs
+      - name: host-usr-bin
+        hostPath:
+          path: /usr/bin
+      - name: host-var-lib
+        hostPath:
+          path: /var/lib
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
