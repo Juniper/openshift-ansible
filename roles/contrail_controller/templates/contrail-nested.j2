@@ -18,13 +18,13 @@ data:
   KEYSTONE_AUTH_ADMIN_PORT: "{{ keystone_auth_admin_port }}"
   KEYSTONE_AUTH_URL_VERSION: "{{ keystone_auth_url_version }}"
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
-  CONTROLLER_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONFIG_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
-  CONFIG_API_VIP: {{ contrail_masters.split() | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONFIG_API_VIP: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   LOG_LEVEL: {{ log_level }}
-  RABBITMQ_NODES: {{ contrail_masters.split() | ipaddr | join(',') }}
+  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
-  ZOOKEEPER_SERVERS: {{ contrail_masters.split() | ipaddr | join(',') }}
+  ZOOKEEPER_SERVERS: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   KUBEMANAGER_NESTED_MODE: "1"
   KUBERNETES_CLUSTER_NAME: "{{ cluster_name | default('k8s') }}"
   KUBERNETES_CLUSTER_PROJECT: "{{ cluster_project | default('{}') }}"
