@@ -61,7 +61,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -76,10 +76,22 @@ spec:
       - name: contrail-download-contrail-status-image
         image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
-        command: ["/usr/bin/true"]
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-kubernetes-cni-init-image
+        image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-vrouter-agent-image
+        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-nodemgr-image
+        image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
       - name: contrail-vrouter-kernel-init
         image: "{{ contrail_registry }}/contrail-vrouter-kernel-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -96,7 +108,7 @@ spec:
           name: host-bin
       - name: contrail-kubernetes-cni-init
         image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -116,7 +128,7 @@ spec:
       containers:
       - name: contrail-vrouter-agent
         image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         # TODO: Priveleged mode is requied because w/o it the device /dev/net/tun
         # is not present in the container. The mounting it into container
         # doesnt help because of permissions are not enough syscalls,
@@ -147,7 +159,7 @@ spec:
           name: localtime
       - name: contrail-agent-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:

@@ -127,7 +127,7 @@ spec:
       containers:
       - name: redis
         image: "redis:4.0.2"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -174,7 +174,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{contrail_registry}}/contrail-node-init:{{contrail_container_tag}}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -189,7 +189,7 @@ spec:
       containers:
       - name: contrail-config-database-nodemgr
         image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -259,7 +259,7 @@ spec:
       containers:
       - name: contrail-configdb
         image: "{{ contrail_registry }}/contrail-external-cassandra:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -312,7 +312,7 @@ spec:
       containers:
       - name: config-zookeeper
         image: "{{ contrail_registry }}/contrail-external-zookeeper:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -362,7 +362,7 @@ spec:
       containers:
       - name: rabbitmq
         image: "{{ contrail_registry }}/contrail-external-rabbitmq:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -416,7 +416,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{contrail_registry}}/contrail-node-init:{{contrail_container_tag}}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -431,7 +431,7 @@ spec:
       containers:
       - name: contrail-database-nodemgr
         image: "{{contrail_registry}}/contrail-nodemgr:{{contrail_container_tag}}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -515,7 +515,7 @@ spec:
       containers:
       - name: kafka
         image: "{{ contrail_registry }}/contrail-external-kafka:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -568,7 +568,7 @@ spec:
       containers:
       - name: contrail-analyticsdb
         image: "{{ contrail_registry }}/contrail-external-cassandra:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -621,7 +621,7 @@ spec:
       containers:
       - name: analytics-zookeeper
         image: "{{ contrail_registry }}/contrail-external-zookeeper:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:

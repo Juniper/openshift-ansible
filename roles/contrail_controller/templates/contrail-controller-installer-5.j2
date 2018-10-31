@@ -97,7 +97,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -112,7 +112,7 @@ spec:
       containers:
       - name: contrail-analytics-api
         image: "{{ contrail_registry }}/contrail-analytics-api:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -127,7 +127,7 @@ spec:
           name: localtime
       - name: contrail-analytics-collector
         image: "{{ contrail_registry }}/contrail-analytics-collector:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -142,7 +142,7 @@ spec:
           name: localtime
       - name: contrail-analytics-alarm-gen
         image: "{{ contrail_registry }}/contrail-analytics-alarm-gen:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -157,7 +157,7 @@ spec:
           name: localtime
       - name: contrail-analytics-query-engine
         image: "{{ contrail_registry }}/contrail-analytics-query-engine:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -172,7 +172,7 @@ spec:
           name: localtime
       - name: contrail-analytics-snmp-collector
         image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -187,7 +187,7 @@ spec:
           name: localtime
       - name: contrail-analytics-topology
         image: "{{ contrail_registry }}/contrail-analytics-topology:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -202,7 +202,7 @@ spec:
           name: localtime
       - name: contrail-analytics-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -267,7 +267,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -282,7 +282,7 @@ spec:
       containers:
       - name: contrail-controller-control
         image: "{{ contrail_registry }}/contrail-controller-control-control:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -297,7 +297,7 @@ spec:
           name: localtime
       - name: contrail-controller-control-dns
         image: "{{ contrail_registry }}/contrail-controller-control-dns:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -312,7 +312,7 @@ spec:
           name: localtime
       - name: contrail-controller-control-named
         image: "{{ contrail_registry }}/contrail-controller-control-named:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -331,7 +331,7 @@ spec:
           name: localtime
       - name: contrail-controller-control-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -400,7 +400,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -415,7 +415,7 @@ spec:
       containers:
       - name: contrail-controller-config-api
         image: "{{ contrail_registry }}/contrail-controller-config-api:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -430,7 +430,7 @@ spec:
           name: localtime
       - name: contrail-controller-config-devicemgr
         image: "{{ contrail_registry }}/contrail-controller-config-devicemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -445,7 +445,7 @@ spec:
           name: localtime
       - name: contrail-controller-config-schema
         image: "{{ contrail_registry }}/contrail-controller-config-schema:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -460,7 +460,7 @@ spec:
           name: localtime
       - name: contrail-controller-config-svcmonitor
         image: "{{ contrail_registry }}/contrail-controller-config-svcmonitor:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -475,7 +475,7 @@ spec:
           name: localtime
       - name: contrail-controller-config-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -546,7 +546,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -561,7 +561,7 @@ spec:
       containers:
       - name: contrail-controller-webui-job
         image: "{{ contrail_registry }}/contrail-controller-webui-job:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -580,7 +580,7 @@ spec:
           name: localtime
       - name: contrail-controller-webui-web
         image: "{{ contrail_registry }}/contrail-controller-webui-web:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
@@ -640,7 +640,7 @@ spec:
       initContainers:
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         env:
@@ -655,7 +655,7 @@ spec:
       containers:
       - name: contrail-kube-manager
         image: "{{ contrail_registry }}/contrail-kubernetes-kube-manager:{{ contrail_container_tag }}"
-        imagePullPolicy: ""
+        imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
         envFrom:
