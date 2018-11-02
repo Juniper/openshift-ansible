@@ -1,11 +1,32 @@
 ---
+- name: Create the get IP file to convert urls to ip
+  template:
+    src: getIp.j2
+    dest: /tmp/getIp.py
+    owner: root
+    mode: 0644
+  run_once: true
+
 - set_fact:
     api_vip: "{{ groups.lb.0 | ipaddr }}"
   when: groups.lb is defined
 
 - set_fact:
+    api_vip: "{{ openshift_master_cluster_public_hostname }}"
+  when: openshift_master_cluster_public_hostname is defined
+
+- set_fact:
     api_vip: "{{ groups.masters.0 | ipaddr }}"
-  when: groups.lb is not defined
+  when: api_vip is not defined
+
+- name: validate api_vip hostname or ip
+  command: python /tmp/getIp.py {{ api_vip }}
+  register: api_vip_result
+
+- name: set api_vip
+  set_fact:
+    api_vip: "{{ api_vip_result.stdout }}"
+  when: api_vip_result is success
 
 - name: Create the agent template file
   template:
