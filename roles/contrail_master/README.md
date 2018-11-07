@@ -5,32 +5,43 @@
 ## SUPPORTED ARCHITECTURE
 
 * Contrail SDN installed through OpenShift ansible supports both **SINGLE-MASTER** and **MULTI-MASTER (High-Availability)** configurations 
+* Contrail components are installed on the infra-node
 
 ## COMPONENTS
 
-### Master (Docker Containers)
+### Contrail Master (Pods)
 
-* Contrail Controller
+* Contrail Image Installer
+* Contrail Controller Config
+* Contrail Controller Control
+* Contrail Controller WebUI
 * Contrail Analytics
 * Contrail Analytics Database
+* Contrail Config DB Node Manager
+* Contrail Config DB
+* Contrail DB Node Manager
 * Contrail Kubernetes Manager
 
-### Node (Docker Containers)
+### Nodes (Pods)
 
-* Contrail vRouter Agent
-* Contrail Kubernetes Agent
+* Contrail Agent
 
-### Node (Kernel Module)
+Note: As part of the agent pod we install the **vrouter kernel module** and the **contrail-cni**.
 
-* Contrail vRouter
+### Contrail Roles
+
+* **Contrail common**: This role contains common functions which are required by other contrail roles
+* **Contrail controller**: Installs all contrail master components
+* **Contrail master**: Preps up the openshift master node
+* **Contrail node**: Installs cni binaries on all nodes
+* **Contrail st**: Preps the contrail schema transformer
+* **Contrail web console**: Installs contrail web console on infra nodes
 
 ## INSTALLATION
 
-To install Contrail SDN with OpenShift Enterprise, follow this [install guide](https://github.com/Juniper/contrail-docker/wiki/Red-Hat-OpenShift-with-Contrail-SDN) and set the following configuration parameters in the inventory
+To install Contrail SDN with OpenShift Enterprise, follow this [install guide](https://github.com/Juniper/contrail-kubernetes-docs)
 
-Refer to this example [inventory](https://github.com/savithruml/openshift-contrail/blob/master/openshift/install-files/all-in-one/ose-install) file for single-master deployment
-
-Refer to this example [inventory](https://github.com/savithruml/openshift-contrail/blob/master/openshift/install-files/all-in-one/ose-install-ha) file for multi-master HA deployment
+Refer to this example [openshift 3.9 contrail installation](https://github.com/Juniper/contrail-kubernetes-docs/blob/master/install/openshift/3.9/standalone-openshift.md) for non-HA/HA deployments
 
 #### Set the flag to "false" to disable OVS
 
@@ -44,13 +55,9 @@ Refer to this example [inventory](https://github.com/savithruml/openshift-contra
 
         openshift_use_contrail=true
 
-#### Set this parameter to the downloaded Contrail SDN image OS
-
-        contrail_os_release=redhat7
-
 #### Set this parameter to the downloaded Contrail SDN image version
 
-        contrail_version=4.1.0.0-8
+        contrail_version=5.0
 
 #### Set Contrail Analytics Database size
 
@@ -60,19 +67,6 @@ Refer to this example [inventory](https://github.com/savithruml/openshift-contra
 
         configdb_min_diskgb=25
 
-#### Set node's physical interface which will be used for Control/data traffic
-
-        vrouter_physical_interface=eno1
-
-#### Set to the path where the Contrail docker image file is located on the ansible host
-
-        contrail_docker_images_path=/root
-
-#### Set CNI version
-
-        cni_version=v0.5.2
-
-
 ### CONTACT
 
-Savithru Lokanath <slokanath@juniper.net>
+Pragash Vijayaragavan <pvijayaragav@juniper.net>
