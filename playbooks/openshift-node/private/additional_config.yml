@@ -95,4 +95,3 @@
   roles:
     - role: contrail_web_console
       when: openshift_use_contrail | default(false) | bool
-
