@@ -36,8 +36,7 @@
     mode: 0644
   run_once: true
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: Create the agent template file
   template:
@@ -47,8 +46,7 @@
     mode: 0644
   run_once: true
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: Create the contrail infrastructure template file
   template:
@@ -58,8 +56,7 @@
     mode: 0644
   run_once: true
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: Create Contrail single YAML file for Contrail 4.0
   template:
@@ -69,7 +66,7 @@
     mode: 0644
   run_once: true
   when:
-    - contrail_version is version('5.0', '<')
+    - contrail_version is version_compare('5.0', '<')
 
 - name: Create Contrail single YAML file for Contrail 5.0
   template:
@@ -79,18 +76,7 @@
     mode: 0644
   run_once: true
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
-
-- name: Create Contrail single YAML file for Contrail 5.1
-  template:
-    src: contrail-installer-5.1.j2
-    dest: /tmp/contrail-installer.yaml
-    owner: root
-    mode: 0644
-  run_once: true
-  when:
-    - contrail_version is version('5.1', '>=')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: Create Contrail single YAML file for Contrail nested mode
   template:
@@ -144,8 +130,7 @@
   run_once: True
   ignore_errors: True
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: sleep for 300 seconds and continue with play
   wait_for: timeout=300
@@ -162,8 +147,7 @@
   run_once: True
   ignore_errors: True
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: sleep for 180 seconds and continue with play
   wait_for: timeout=180
@@ -186,8 +170,7 @@
   run_once: True
   ignore_errors: True
   when:
-    - contrail_version is version('5.0', '>=')
-    - contrail_version is version('5.1', '<')
+    - contrail_version is version_compare('5.0', '>=')
 
 - name: Check Pods script to Master Node
   command: /tmp/wait_for_pod.sh
