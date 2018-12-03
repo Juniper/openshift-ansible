@@ -118,6 +118,17 @@
 - name: Label contrail master nodes with opencontrail.org/controller=true
   command: "{{ openshift_client_binary }} label nodes {{ hostvars[item]['openshift_hostname'] }} opencontrail.org/controller=true --overwrite=true"
   with_items: "{{ contrail_masters.split() }}"
+  when: contrail_control_data_interface is undefined
+
+- name: Label contrail master nodes with opencontrail.org/controller=true when control data is given
+  command: "{{ openshift_client_binary }} label nodes {{ item }} opencontrail.org/controller=true --overwrite=true"
+  with_items: "{{ contrail_masters.split() }}"
+  when: contrail_control_data_interface is defined
+
+- name: Label contrail master nodes with node-role.kubernetes.io/compute=true when control data is given
+  command: "{{ openshift_client_binary }} label nodes {{ item }} node-role.kubernetes.io/compute=true --overwrite=true"
+  with_items: "{{ contrail_masters.split() }}"
+  when: contrail_control_data_interface is defined
 
 - name: Create Contrail registry secret
   command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n kube-system"
