@@ -5,3 +5,8 @@
 - set_fact:
     contrail_masters_ip: "{{ contrail_masters_ip }} {{ hostvars[item]['ansible_default_ipv4']['address'] }}"
   with_items: "{{ contrail_masters.split() }}"
+  when: contrail_control_data_interface is undefined
+
+- set_fact:
+    contrail_masters_ip: "{{ contrail_control_data_interface }}"
+  when: contrail_control_data_interface is defined
