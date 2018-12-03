@@ -1,0 +1,14 @@
+---
+- name: Create the get IP file to convert hostname to ip
+  template:
+    src: getHostName.j2
+    dest: /tmp/getHostName.py
+    owner: root
+    mode: 0644
+
+- set_fact:
+    contrail_masters: ""
+
+- name: Get contrail masters for contrail control data ips ips
+  include_tasks: get_contrail_masters.yaml item={{ item }}
+  with_items: "{{ contrail_control_data_interface.split() }}"

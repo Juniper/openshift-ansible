@@ -85,7 +85,7 @@
       when: openshift_use_contrail | default(false) | bool
 
 - name: Configure Contrail ST
-  hosts: oo_nodes_use_contrail
+  hosts: oo_first_master
   roles:
   - role: contrail_st
     when: openshift_use_contrail | default(false) | bool

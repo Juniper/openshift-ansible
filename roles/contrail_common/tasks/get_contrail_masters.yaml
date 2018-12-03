@@ -1,0 +1,9 @@
+---
+- name: Check for hostname for {{ item }}
+  command: python /tmp/getHostName.py {{ item }}
+  register: result
+
+- name: Append to contrail_masters
+  set_fact:
+    contrail_masters: "{{ contrail_masters }} {{ result.stdout }}"
+  when: result is success
