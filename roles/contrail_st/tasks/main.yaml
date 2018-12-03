@@ -1,3 +1,4 @@
 ---
-- name: Sanitize Schema Transformer process.
-  include_tasks: schema_transformer_sanity.yaml
+- name: Sanitize Schema Transformer process for.
+  include_tasks: schema_transformer_sanity.yaml item="{{ item }}"
+  with_items: "{{ contrail_masters.split() }}"

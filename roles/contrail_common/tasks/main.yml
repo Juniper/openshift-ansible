@@ -4,3 +4,7 @@
 
 - name: Convert hostnames to ip
   include_tasks: hosts_to_ip.yaml
+
+- name: Ips to hostname if contrail control data interface given
+  include_tasks: ips_to_host_name.yaml
+  when: contrail_control_data_interface is defined
