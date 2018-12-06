@@ -1,0 +1,15 @@
+- name: create master directory
+  become: yes
+  file:
+    path: /etc/origin/master
+    state: directory
+
+- name: copy contrail certs to master folder
+  become: yes
+  command: cp -rf /etc/origin/contrail/contrail.etcd-ca.crt /etc/origin/master/master.etcd-ca.crt
+
+- become: yes
+  command: cp -rf /etc/origin/contrail/contrail.etcd-client.crt /etc/origin/master/master.etcd-client.crt
+
+- become: yes
+  command: cp -rf /etc/origin/contrail/contrail.etcd-client.key /etc/origin/master/master.etcd-client.key
