@@ -4,11 +4,20 @@
 # "..error unmarshaling JSON: json: cannot unmarshal number into Go value of type string.."
 # (https://github.com/kubernetes/kubernetes/issues/2763)
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: contrail-system
+  labels:
+    name: contrail-system
+  annotations:
+    openshift.io/node-selector:
+---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: contrail-image-installer
-  namespace: kube-system
+  namespace: contrail-system
   labels:
     app: contrail-image-download
 spec:
@@ -21,9 +30,6 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-            - matchExpressions:
-              - key: "opencontrail.org/controller"
-                operator: Exists
             - matchExpressions:
               - key: "opencontrail.org/controller"
                 operator: Exists

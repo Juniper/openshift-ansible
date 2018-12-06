@@ -97,7 +97,7 @@
 
 - name: Add Contrail service account to privileged scc
   oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:contrail
+    user: system:serviceaccount:contrail-system:contrail
     resource_kind: scc
     resource_name: privileged
     state: present
@@ -105,7 +105,7 @@
 
 - name: Add the daemonset-controller service account to privileged scc
   oc_adm_policy_user:
-    user: system:serviceaccount:kube-system:daemon-set-controller
+    user: system:serviceaccount:contrail-system:daemon-set-controller
     resource_kind: scc
     resource_name: privileged
     state: present
@@ -120,7 +120,7 @@
   with_items: "{{ contrail_masters.split() }}"
 
 - name: Create Contrail registry secret
-  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n kube-system"
+  command: "{{ openshift_client_binary }} create secret docker-registry contrail-registry-secret --docker-server={{ contrail_registry }} --docker-username={{ contrail_registry_username }} --docker-password={{ contrail_registry_password }} --docker-email=contrail@helloworld.com -n contrail-system"
   run_once: True
   when: contrail_registry_username is defined
   ignore_errors: True

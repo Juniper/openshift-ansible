@@ -3,6 +3,10 @@
   include_role:
     name: contrail_common
 
+- name: Generate cert for contrail nodes
+  include_tasks: etcd_certs.yaml
+  when: inventory_hostname in contrail_masters
+
 - name: Set ntp on nodes
   include_tasks: ntp.yml
 
