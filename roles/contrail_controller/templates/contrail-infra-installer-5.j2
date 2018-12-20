@@ -29,6 +29,11 @@ data:
   VROUTER_GATEWAY: {{ vrouter_gateway }}
   WEBUI_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
   ZOOKEEPER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICSDB_ENABLE: "true"
+  ANALYTICS_ALARM_ENABLE: "true"
+  ANALYTICS_SNMP_ENABLE: "true"
+  ANALYTICS_SNMP_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  ANALYTICS_ALARM_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
 ---
 apiVersion: v1
 kind: ConfigMap
