@@ -1,0 +1,78 @@
+---
+- name: contrail Node | Set cert flag
+  set_fact:
+    contrail_certs_provided: "{{ contrail_etcd_ca_cert_file is defined or contrail_etcd_cert_file is defined or contrail_etcd_key_file is defined or contrail_etcd_endpoints is defined | bool }}"
+
+- name: contrail Node | Error if invalid cert arguments
+  fail:
+    msg: "Must provide all or none for the following etcd params: contrail_etcd_ca_cert_file, contrail_etcd_cert_file, contrail_etcd_key_file, contrail_etcd_endpoints"
+  when:
+  - contrail_certs_provided
+  - not (contrail_etcd_ca_cert_file is defined and contrail_etcd_cert_file is defined and contrail_etcd_key_file is defined and contrail_etcd_endpoints is defined)
+
+- name: contrail Node | Set separate contrail etcd flag
+  set_fact:
+    use_contrail_etcd: "{{ contrail_etcd_initial_cluster is defined or contrail_etcd_generate_certs is defined or contrail_etcd_service_ip is defined or contrail_etcd_clients_port is defined or contrail_etcd_peers_port is defined or contrail_etcd_cert_dir is defined or contrail_etcd_mount is defined | bool }}"
+
+- name: contrail Node | Error if using separate etcd with invalid arguments
+  fail:
+    msg: "Must provide all or none of the following etcd params: contrail_etcd_initial_cluster, contrail_etcd_generate_certs, contrail_etcd_service_ip, contrail_etcd_clients_port, contrail_etcd_peers_port, contrail_etcd_cert_dir, and contrail_etcd_mount"
+  when:
+  - use_contrail_etcd
+  - not (contrail_certs_provided and contrail_etcd_initial_cluster is defined and contrail_etcd_generate_certs is defined and contrail_etcd_service_ip is defined and contrail_etcd_clients_port is defined and contrail_etcd_peers_port is defined and contrail_etcd_cert_dir is defined and contrail_etcd_mount is defined)
+
+- name: contrail Node | Configure separate contrail etcd and certs
+  when: use_contrail_etcd
+  become: yes
+  include_role:
+    name: etcd
+    tasks_from: server_certificates
+  vars:
+    etcd_cert_prefix: contrail-etcd-
+    etcd_conf_dir: "{{ contrail_etcd_cert_dir }}"
+    etcd_cert_config_dir: "{{ contrail_etcd_cert_dir }}"
+    etcd_ca_host: "{{ groups.oo_etcd_to_config.0 }}"
+    etcd_cert_subdir: "contrail-etcd-{{ openshift.common.hostname }}"
+
+- name: contrail Node | Set etcd cert location facts
+  when: not contrail_certs_provided
+  set_fact:
+    contrail_etcd_ca_cert_file: "/etc/origin/master/master.etcd-ca.crt"
+    contrail_etcd_cert_file: "/etc/origin/master/master.etcd-client.crt"
+    contrail_etcd_key_file: "/etc/origin/master/master.etcd-client.key"
+    contrail_etcd_endpoints: "{{ hostvars[groups.oo_first_master.0].openshift_master_etcd_urls | join(',') }}"
+
+- name: contrail Node | Error if no certs set.
+  fail:
+    msg: "Invalid etcd configuration for contrail."
+  when: item is not defined or item == ''
+  with_items:
+  - contrail_etcd_ca_cert_file
+  - contrail_etcd_cert_file
+  - contrail_etcd_key_file
+  - contrail_etcd_endpoints
+
+- name: contrail Node | Assure the contrail certs are present
+  stat:
+    path: "{{ item }}"
+    get_checksum: false
+    get_attributes: false
+    get_mime: false
+  with_items:
+  - "{{ contrail_etcd_ca_cert_file }}"
+  - "{{ contrail_etcd_cert_file }}"
+  - "{{ contrail_etcd_key_file }}"
+
+- name: Create secret
+  oc_secret:
+    name: contrail-etcd-secrets
+    state: present
+    namespace: kube-system
+    files:
+    - name: etcd-key
+      path: "{{ contrail_etcd_key_file }}"
+    - name: etcd-cert
+      path: "{{ contrail_etcd_cert_file }}"
+    - name: etcd-ca
+      path: "{{ contrail_etcd_ca_cert_file }}"
+  run_once: true
