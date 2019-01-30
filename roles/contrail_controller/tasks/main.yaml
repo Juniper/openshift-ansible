@@ -1,0 +1,8 @@
+---
+- name: Get contrail nodes and ips
+  include_role:
+    name: contrail_common
+
+- name: Creating the containers
+  include_tasks: os_contrail_master.yaml
+#  when: nested_mode_contrail | bool
