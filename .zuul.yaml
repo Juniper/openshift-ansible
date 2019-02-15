@@ -1,0 +1,10 @@
+- project:
+    name: Juniper/openshift-ansible
+    check:
+      jobs:
+        - contrail-sanity-rhel7-openshift-3.9:
+            branches: ^release-3\.9-contrail$
+            dependencies:
+              - contrail-build-containers-rhel7-queens
+              - contrail-build-test-containers
+
