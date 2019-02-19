@@ -3,8 +3,82 @@
     check:
       jobs:
         - contrail-sanity-rhel7-openshift-3.9:
-            branches: ^release-3\.9-contrail$
+          branches: ^release-3\.9-contrail$
             dependencies:
               - contrail-build-containers-rhel7-queens
               - contrail-build-test-containers
+
+- job:
+  name: contrail-vnc-base
+  branches: ^release-3\.9-contrail$
+  parent: contrail-base-untrusted
+  description: |
+    A base job that prepares Contrail VNC sandbox using Android repo,
+    as opposed to the contrail-src-base job that copies the sources directly.
+  required-projects:
+    - name: Juniper/contrail-analytics
+      override-checkout: R5.0
+    - name: Juniper/contrail-api-client
+      override-checkout: R5.0
+    - name: Juniper/contrail-build
+      override-checkout: R5.0
+    - name: Juniper/contrail-common
+      override-checkout: R5.0
+    - name: Juniper/contrail-controller
+      override-checkout: R5.0
+    - name: Juniper/contrail-fabric-utils
+      override-checkout: R5.0
+    - name: Juniper/contrail-dpdk
+      override-checkout: contrail_dpdk_17_11_3
+    - name: Juniper/contrail-generateDS
+      override-checkout: R5.0
+    - name: Juniper/contrail-heat
+      override-checkout: R5.0
+    - name: Juniper/contrail-java-api
+      override-checkout: R5.0
+    - name: Juniper/contrail-neutron-plugin
+      override-checkout: R5.0
+    - name: Juniper/contrail-nova-vif-driver
+      override-checkout: R5.0
+    - name: Juniper/contrail-packages
+      override-checkout: R5.0
+    - name: Juniper/contrail-provisioning
+      override-checkout: R5.0
+    - name: Juniper/contrail-sandesh
+      override-checkout: R5.0
+    - name: Juniper/contrail-specs
+      override-checkout: R5.0
+    - name: Juniper/contrail-test
+      override-checkout: R5.0
+    - name: Juniper/contrail-third-party
+      override-checkout: R5.0
+    - name: Juniper/contrail-tripleo-puppet
+      override-checkout: R5.0
+    - name: Juniper/contrail-vcenter-plugin
+      override-checkout: R5.0
+    - name: Juniper/contrail-vcenter-manager
+      override-checkout: R5.0
+    - name: Juniper/contrail-vnc
+      override-checkout: R5.0
+    - name: Juniper/contrail-vrouter
+      override-checkout: R5.0
+    - name: Juniper/contrail-vrouter-java-api
+      override-checkout: R5.0
+    - name: Juniper/contrail-vro-plugin
+      override-checkout: R5.0
+    - name: Juniper/contrail-web-controller
+      override-checkout: R5.0
+    - name: Juniper/contrail-web-core
+      override-checkout: R5.0
+    - name :Juniper/contrail-web-server-manager
+      override-checkout: R5.0
+    - name: Juniper/contrail-web-storage
+      override-checkout: R5.0
+    - name: Juniper/contrail-webui-third-party
+      override-checkout: R5.0
+    - name: Juniper/vijava
+      override-checkout: R5.0
+  pre-run: playbooks/contrail/vnc-pre.yaml
+  vars:
+    tpc_branch: 'R5.0'
 
