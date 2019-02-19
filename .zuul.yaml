@@ -1,6 +1,9 @@
 - project:
     name: Juniper/openshift-ansible
     check:
+      templates:
+        - openshift-systests:
+            branches: ^R5\.0$
       jobs:
         - contrail-sanity-rhel7-openshift-3.9:
             branches: ^release-3\.9-contrail$
