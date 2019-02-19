@@ -1,10 +1,26 @@
+- project-template:
+      name: openshift-systests
+      check:
+        jobs:
+          - contrail-vnc-build-package-rhel7-queens:
+              branches: ^R5\.0$
+          - contrail-build-containers-rhel7-queens:
+              branches: ^R5\.0$
+              dependencies:
+                - contrail-vnc-build-package-rhel7-queens
+          - contrail-build-test-containers:
+              branches: ^R5\.0$
+              dependencies:
+                - contrail-vnc-build-package-rhel7-queens
+          - contrail-sanity-rhel7-openshift-3.9:
+              branches: ^release-3\.9-contrail$
+              dependencies:
+                - contrail-build-containers-rhel7-queens
+                - contrail-build-test-containers
+
 - project:
     name: Juniper/openshift-ansible
     check:
-      jobs:
-        - contrail-sanity-rhel7-openshift-3.9:
-            branches: ^release-3\.9-contrail$
-            dependencies:
-              - contrail-build-containers-rhel7-queens
-              - contrail-build-test-containers
+      templates:
+        - openshift-systests
 
