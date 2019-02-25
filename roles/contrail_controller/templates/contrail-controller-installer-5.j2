@@ -185,8 +185,8 @@ spec:
           name: analytics-logs
         - mountPath: /etc/localtime
           name: localtime
-      - name: contrail-analytics-snmp-topology
-        image: "{{ contrail_registry }}/contrail-analytics-snmp-topology:{{ contrail_container_tag }}"
+      - name: contrail-analytics-topology
+        image: "{{ contrail_registry }}/contrail-analytics-topology:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         securityContext:
           privileged: true
