@@ -1,8 +1,43 @@
-# Configs section
-# Note: using ".." for ports, because in v1 there is a bug
-# which leads to an error
-# "..error unmarshaling JSON: json: cannot unmarshal number into Go value of type string.."
-# (https://github.com/kubernetes/kubernetes/issues/2763)
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: contrail
+  namespace: contrail-system
+---
+kind: ClusterRole
+apiVersion: v1
+metadata:
+  name: contrail
+  namespace: contrail-system
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: v1
+kind: ClusterRoleBinding
+metadata:
+  name: contrail
+roleRef:
+  name: contrail
+subjects:
+- kind: SystemUser
+  name: contrail-system:contrail
+- kind: ServiceAccount
+  name: contrail
+  namespace: contrail-system
+userNames:
+  - system:serviceaccount:contrail-system:contrail
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: contrail-kubernetes-token
+  namespace: contrail-system
+  annotations:
+    kubernetes.io/service-account.name: contrail
+type: kubernetes.io/service-account-token
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -18,14 +53,15 @@ data:
   KEYSTONE_AUTH_ADMIN_PORT: "{{ keystone_auth_admin_port }}"
   KEYSTONE_AUTH_URL_VERSION: "{{ keystone_auth_url_version }}"
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
-  CONTROLLER_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
-  CONFIG_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
-  CONFIG_API_VIP: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  CONTROLLER_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+  CONFIG_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+  CONFIG_API_VIP: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
   LOG_LEVEL: {{ log_level }}
-  RABBITMQ_NODES: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
-  RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port }}"
-  ZOOKEEPER_SERVERS: {{ contrail_masters_ip.split() | ipaddr | join(',') }}
+  RABBITMQ_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+  RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port | default('5673') }}"
+  ZOOKEEPER_SERVERS: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
   KUBEMANAGER_NESTED_MODE: "1"
+  K8S_TOKEN_FILE: "/tmp/serviceaccount/token"
   KUBERNETES_CLUSTER_NAME: "{{ cluster_name | default('k8s') }}"
   KUBERNETES_CLUSTER_PROJECT: "{{ cluster_project | default('{}') }}"
   KUBERNETES_CLUSTER_NETWORK: "{{ cluster_network }}"
@@ -33,7 +69,7 @@ data:
   KUBERNETES_IP_FABRIC_SUBNETS: "{{ ip_fabric_subnets | default('10.64.0.0/12') }}"
   KUBERNETES_SERVICE_SUBNETS: "{{ service_subnets | default('10.96.0.0/12') }}"
   KUBERNETES_IP_FABRIC_FORWARDING: "{{ ip_fabric_forwarding | default('false') }}"
-  KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('false') }}"
+  KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('true') }}"
   KUBERNETES_PUBLIC_FIP_POOL: "{{ public_fip_pool | default('{}') }}"
   KUBERNESTES_NESTED_VROUTER_VIP: {{ k8s_nested_vrouter_vip }}
 ---
@@ -66,18 +102,17 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
             - matchExpressions:
-              - key: "node-role.kubernetes.io/master"
+              - key: region
+                value: infra
                 operator: Exists
-      tolerations:
-      - key: node-role.kubernetes.io/master
-        operator: Exists
-        effect: NoSchedule
       automountServiceAccountToken: false
       hostNetwork: true
       containers:
       - name: contrail-kube-manager
         image: "{{contrail_registry}}/contrail-kubernetes-kube-manager:{{contrail_container_tag}}"
         imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
         envFrom:
         - configMapRef:
             name: env
@@ -98,7 +133,7 @@ spec:
           path: /var/log/contrail/kube-manager
       - name: pod-secret
         secret:
-          secretName: contrail-kube-manager-token
+          secretName: contrail-kubernetes-token
 ---
 apiVersion: extensions/v1beta1
 kind: DaemonSet
@@ -114,15 +149,6 @@ spec:
         app: contrail-agent
     spec:
       #Disable affinity for single node setup
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: "node-role.opencontrail.org/controller"
-                operator: NotIn
-                values:
-                - "true"
       automountServiceAccountToken: false
       hostNetwork: true
       containers:
@@ -156,40 +182,3 @@ spec:
         hostPath:
           path: /var/lib/contrail
 ---
-kind: ClusterRole
-apiVersion: rbac.authorization.k8s.io/v1beta1
-metadata:
-  name: contrail-kube-manager
-  namespace: contrail-system
-rules:
-  - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["*"]
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: contrail-kube-manager
-  namespace: contrail-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: contrail-kube-manager
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: contrail-kube-manager
-subjects:
-- kind: ServiceAccount
-  name: contrail-kube-manager
-  namespace: contrail-system
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: contrail-kube-manager-token
-  namespace: contrail-system
-  annotations:
-    kubernetes.io/service-account.name: contrail-kube-manager
-type: kubernetes.io/service-account-token

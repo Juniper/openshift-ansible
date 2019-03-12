@@ -88,7 +88,9 @@
   hosts: oo_nodes_use_contrail
   roles:
   - role: contrail_st
-    when: openshift_use_contrail | default(false) | bool
+    when:
+      - openshift_use_contrail | default(false) | bool
+      - not nested_mode_contrail | default(false) | bool
 
 - name: Install Contrail Customized Web Console
   hosts: oo_first_master

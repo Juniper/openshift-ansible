@@ -88,15 +88,6 @@
   when:
     - contrail_version is version('5.0', '>=')
 
-- name: Create Contrail single YAML file for Contrail nested mode
-  template:
-    src: contrail-nested.j2
-    dest: /tmp/contrail-installer.yaml
-    owner: root
-    mode: 0644
-  when:
-    - nested_mode_contrail == "true"
-
 - name: Copy the wait for POD script to master node
   template:
     src: wait_for_pod.j2

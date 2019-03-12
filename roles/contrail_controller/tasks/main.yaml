@@ -3,5 +3,10 @@
   include_role:
     name: contrail_common
 
-- name: Creating the containers
+- name: Create contrail controller components and Daemonsets
   include_tasks: os_contrail_master.yaml
+  when: not nested_mode_contrail | default(false) | bool
+
+- name: Create contrail nested components
+  include_tasks: os_contrail_nested.yaml
+  when: nested_mode_contrail | default(false) | bool
