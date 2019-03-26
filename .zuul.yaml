@@ -1,0 +1,5 @@
+- project:
+    name: Juniper/openshift-ansible
+    experimental:
+      jobs:
+        - contrail-base-variant-run
