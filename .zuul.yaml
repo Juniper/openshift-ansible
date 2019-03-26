@@ -7,4 +7,6 @@
             dependencies:
               - contrail-build-containers-rhel7-queens
               - contrail-build-test-containers
-
+    experimental:
+      jobs:
+        - contrail-base-variant-run
