@@ -78,8 +78,8 @@ spec:
         image: "{{ contrail_registry }}/contrail-analytics-snmp-collector:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         command: ["/bin/true"]
-      - name: contrail-download-analytics-snmp-topology-image
-        image: "{{ contrail_registry }}/contrail-analytics-snmp-topology:{{ contrail_container_tag }}"
+      - name: contrail-download-analytics-topology-image
+        image: "{{ contrail_registry }}/contrail-analytics-topology:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         command: ["/bin/true"]
       - name: contrail-download-controller-control-image
