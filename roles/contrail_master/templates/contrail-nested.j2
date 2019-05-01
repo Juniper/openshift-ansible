@@ -59,8 +59,16 @@ data:
   KEYSTONE_AUTH_URL_VERSION: "{{ keystone_auth_url_version }}"
   CLOUD_ORCHESTRATOR: {{ cloud_orchestrator }}
   CONTROLLER_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% if config_nodes is defined %}
+  CONFIG_NODES: {{ config_nodes.split() | ipaddr | join(',') }}
+{% else %}
   CONFIG_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
-  CONFIG_API_VIP: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% endif %}
+{% if analytics_nodes is defined %}
+  ANALYTICS_NODES: {{ analytics_nodes.split() | ipaddr | join(',') }}
+{% else %}
+  ANALYTICS_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
+{% endif %}
   LOG_LEVEL: {{ log_level }}
   RABBITMQ_NODES: {{ contrail_nested_masters_ip.split() | ipaddr | join(',') }}
   RABBITMQ_NODE_PORT: "{{ rabbitmq_node_port | default('5672') }}"
