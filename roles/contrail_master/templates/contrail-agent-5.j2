@@ -62,7 +62,6 @@ spec:
     spec:
       automountServiceAccountToken: false
       hostNetwork: true
-      hostPID: true
       initContainers:
       - name: kubernetes-entrypoint-init
         image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
@@ -200,8 +199,6 @@ spec:
           name: var-crashes
         - mountPath: /etc/localtime
           name: localtime
-        - mountPath: /var/run
-          name: docker-unix-socket
       - name: contrail-agent-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
