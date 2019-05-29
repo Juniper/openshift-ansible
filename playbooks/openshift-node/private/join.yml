@@ -72,7 +72,11 @@
   - role: nuage_node
     when: openshift_use_nuage | default(false) | bool
 
-- import_playbook: contrail_sanitize.yml
+- name: Additional calico node config
+  hosts: oo_nodes_use_calico
+  roles:
+  - role: calico_node
+    when: openshift_use_calico | default(false) | bool
 
 - name: NSX Node Configuration
   hosts: oo_nodes_to_config
@@ -80,11 +84,13 @@
   - role: nsx_node
     when: openshift_use_nsx | default(false) | bool
 
-- name: Additional calico node config
-  hosts: oo_nodes_use_calico
+- name: Configure Aci node
+  hosts: oo_nodes_use_aci
   roles:
-  - role: calico_node
-    when: openshift_use_calico | default(false) | bool
+  - role: aci
+    when: openshift_use_aci | default(false) | bool
+
+- import_playbook: contrail_sanitize.yml
 
 - name: Node Join Checkpoint End
   hosts: all
