@@ -17,3 +17,5 @@ zookeeper_analytics_ports: 4888:5888
 vrouter_gateway:
 kubernetes_api_secure_port: 8443
 nested_mode_contrail: false
+contrail_registry: opencontrailnightly
+contrail_container_tag: latest
