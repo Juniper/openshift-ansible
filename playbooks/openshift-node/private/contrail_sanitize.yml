@@ -34,14 +34,14 @@
 - name: Contrail Sanitize schema transformer
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
   roles:
-  - role: contrail_common
-    when:
-      - openshift_use_contrail | default(false) | bool
-      - not nested_mode_contrail | default(false) | bool
-  - role: contrail_st
-    when:
-      - openshift_use_contrail | default(false) | bool
-      - not nested_mode_contrail | default(false) | bool
+    - role: contrail_common
+      when:
+        - openshift_use_contrail | default(false) | bool
+        - not nested_mode_contrail | default(false) | bool
+    - role: contrail_st
+      when:
+        - openshift_use_contrail | default(false) | bool
+        - not nested_mode_contrail | default(false) | bool
 
 - name: Contrail Restarting dnsmasq service
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"

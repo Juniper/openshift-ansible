@@ -106,9 +106,3 @@
     - "contrail-ext-redis"
     - "contrail-kube-manager"
     - "contrail-webui"
-
-- name: Patch restricted scc
-  command: >
-    "{{ openshift_client_binary }} patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'"
-  run_once: True
-  ignore_errors: True
