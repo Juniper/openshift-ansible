@@ -42,9 +42,10 @@
   run_once: True
 
 - name: Create the contrail-system namespace
-  command: "{{ openshift_client_binary }} create -f /tmp/contrail-namespace.yaml"
+  oc_project:
+    state: present
+    name: "contrail-system"
   run_once: True
-  ignore_errors: True
 
 - name: Create the contrail template files
   template:
@@ -106,9 +107,3 @@
     - "contrail-ext-redis"
     - "contrail-kube-manager"
     - "contrail-webui"
-
-- name: Patch restricted scc
-  command: >
-    "{{ openshift_client_binary }} patch scc restricted --patch='{ "runAsUser": { "type": "RunAsAny" } }'"
-  run_once: True
-  ignore_errors: True

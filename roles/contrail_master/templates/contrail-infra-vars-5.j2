@@ -90,7 +90,7 @@ data:
   KUBERNETES_IP_FABRIC_SUBNETS: "{{ ip_fabric_subnets | default('10.64.0.0/12') }}"
   KUBERNETES_SERVICE_SUBNETS: "{{ service_subnets | default('10.96.0.0/12') }}"
   KUBERNETES_IP_FABRIC_FORWARDING: "{{ ip_fabric_forwarding | default('false') }}"
-  KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('true') }}"
+  KUBERNETES_IP_FABRIC_SNAT: "{{ ip_fabric_snat | default('false') }}"
   KUBERNETES_PUBLIC_FIP_POOL: "{{ public_fip_pool | default('{}') }}"
 ---
 apiVersion: v1
