@@ -19,3 +19,5 @@ kubernetes_api_secure_port: 8443
 nested_mode_contrail: false
 contrail_registry: opencontrailnightly
 contrail_container_tag: latest
+contrail_configure_iptables: true
+firewall_zone: public
