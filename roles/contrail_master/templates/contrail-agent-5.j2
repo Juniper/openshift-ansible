@@ -1,4 +1,4 @@
-# This file contains the contrail agent components.
+#This file contains the contrail agent components.
 # This component will be installed as DaemonSet on all nodes
 ---
 apiVersion: v1
@@ -99,10 +99,15 @@ spec:
         securityContext:
           privileged: true
         env:
+{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld %}
+        - name: CONFIGURE_FIREWALLD
+          value: true
+        - name: FIREWALL_ZONE
+          value: {{firewall_zone}}
+{% else %}
         - name: CONFIGURE_IPTABLES
-          value: "true"
-        - name: IPTABLES_CHAIN
-          value: "OS_FIREWALL_ALLOW"
+          value: true
+{% endif %}
         - name: CONTRAIL_STATUS_IMAGE
           value: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
         - name: NODE_TYPE
