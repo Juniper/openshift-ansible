@@ -61,12 +61,12 @@ spec:
         env:
 {% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld %}
         - name: CONFIGURE_FIREWALLD
-          value: true
+          value: "true"
         - name: FIREWALL_ZONE
-          value: {{firewall_zone}}
+          value: "{{firewall_zone}}"
 {% else %}
         - name: CONFIGURE_IPTABLES
-          value: true
+          value: "true"
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
 {% endif %}
@@ -240,12 +240,12 @@ spec:
         env:
 {% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld %}
         - name: CONFIGURE_FIREWALLD
-          value: true
+          value: "true"
         - name: FIREWALL_ZONE
-          value: {{firewall_zone}}
+          value: "{{firewall_zone}}"
 {% else %}
         - name: CONFIGURE_IPTABLES
-          value: true
+          value: "true"
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
 {% endif %}
