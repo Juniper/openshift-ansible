@@ -16,6 +16,9 @@ openshift_disable_check=memory_availability,package_availability,disk_availabili
 # Default node selectors
 openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 
+# firewalld options
+#os_firewall_use_firewalld=true
+
 # Redhat customer credentials
 oreg_auth_user=<>
 oreg_auth_password=<>
@@ -34,14 +37,13 @@ openshift_master_cluster_method=native
 # Set this line to enable NFS
 openshift_enable_unsupported_configurations=True
 
-
 #########################################################################
 ### Contrail Variables
 ########################################################################
 
-contrail_version=5.0
+contrail_version=5.1
 
-contrail_container_tag=5.1.0-0.494-rhel-queens
+contrail_container_tag=rhel-5.1-76
 #contrail_registry="ci-repo.englab.juniper.net:5010"
 #contrail_registry_username=<>
 #contrail_registry_password=<>
@@ -72,8 +74,13 @@ openshift_docker_insecure_registries="ci-repo.englab.juniper.net:5010"
 # vip should be master
 #api_vip="172.31.25.175"
 
+# service subnet and pod subnet in contrail
 service_subnets="172.30.0.0/16"
 pod_subnets="10.128.0.0/14"
+
+# following variables change pod and service subnet in openshift
+#osm_cluster_network_cidr=10.128.0.0/14
+#openshift_portal_net=172.30.0.0/16
 
 ###########################################################################
 ### OpenShift Network Vars
@@ -209,10 +216,6 @@ openshift_prometheus_alertbuffer_storage_volume_name=prometheus-alertbuffer
 openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 openshift_prometheus_alertbuffer_storage_type='pvc'
-
-
-os_firewall_use_firewalld=true
-firewall_zone=public
 
 ###########################################################################
 ### OpenShift Hosts

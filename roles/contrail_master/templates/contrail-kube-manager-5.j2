@@ -60,7 +60,7 @@ spec:
         securityContext:
           privileged: true
         env:
-{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld %}
+{% if os_firewall_use_firewalld is defined and os_firewall_use_firewalld.lower() == 'true' %}
         - name: CONFIGURE_FIREWALLD
           value: "true"
         - name: FIREWALL_ZONE
@@ -71,7 +71,6 @@ spec:
         - name: IPTABLES_CHAIN
           value: "OS_FIREWALL_ALLOW"
 {% endif %}
-
         - name: NODE_TYPE
           value: "kubernetes"
         - name: CONTRAIL_STATUS_IMAGE
