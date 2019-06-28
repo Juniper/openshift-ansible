@@ -16,9 +16,6 @@ openshift_disable_check=memory_availability,package_availability,disk_availabili
 # Default node selectors
 openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 
-# firewalld options
-#os_firewall_use_firewalld=true
-
 # Redhat customer credentials
 oreg_auth_user=<>
 oreg_auth_password=<>
