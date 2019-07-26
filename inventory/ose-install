@@ -17,8 +17,8 @@ openshift_disable_check=memory_availability,package_availability,disk_availabili
 openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 
 # Redhat customer credentials
-oreg_auth_user=<>
-oreg_auth_password=<>
+oreg_auth_user=contrail.systems
+oreg_auth_password=Embe1mpls_007
 ###########################################################################
 ### OpenShift Master Vars
 ###########################################################################
@@ -40,8 +40,8 @@ openshift_enable_unsupported_configurations=True
 
 contrail_version=5.1
 
-contrail_container_tag=rhel-5.1-76
-#contrail_registry="ci-repo.englab.juniper.net:5010"
+contrail_container_tag=rhel-queens-1908-5
+contrail_registry="ci-repo.englab.juniper.net:5010"
 #contrail_registry_username=<>
 #contrail_registry_password=<>
 # need to notify openshift to configure insecure registry as below
@@ -55,7 +55,7 @@ openshift_docker_insecure_registries="ci-repo.englab.juniper.net:5010"
 #CLOUD_ORCHESTRATOR=openshift
 #LOG_LEVEL=SYS_NOTICE
 #METADATA_PROXY_SECRET=contrail
-#cloud_orchestrator=kubernetes
+cloud_orchestrator=kubernetes
 #metadata_proxy_secret=contrail
 #log_level=SYS_NOTICE
 #rabbitmq_node_port=5672
@@ -214,6 +214,11 @@ openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 openshift_prometheus_alertbuffer_storage_type='pvc'
 
+multi_interface='true'
+control_nodes=192.168.100.2
+controller_nodes=10.84.13.54
+physical_interface=ens2f0
+
 ###########################################################################
 ### OpenShift Hosts
 ###########################################################################
@@ -224,15 +229,15 @@ nodes
 nfs
 
 [masters]
-a5s38node3
+a6s41node3
 
 [etcd]
-a5s38node3
+a6s41node3
 
 [nodes]
-a5s38node3 openshift_node_group_name='node-config-master'
-a6s41node4 openshift_node_group_name='node-config-compute'
-a6s41node3 openshift_node_group_name='node-config-infra'
+a6s41node3 openshift_node_group_name='node-config-master'
+a6s32node1 openshift_node_group_name='node-config-compute'
+a6s41node4 openshift_node_group_name='node-config-infra'
 
 [nfs]
-a6s41node4
+a6s32node1
