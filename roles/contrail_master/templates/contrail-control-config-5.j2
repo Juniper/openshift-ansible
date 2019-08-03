@@ -80,6 +80,12 @@ spec:
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
+        - mountPath: /usr/bin
+          name: host-usr-bin
+        - mountPath: /run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       containers:
       - name: contrail-controller-control
         image: "{{ contrail_registry }}/contrail-controller-control-control:{{ contrail_container_tag }}"
@@ -175,6 +181,9 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
@@ -259,6 +268,12 @@ spec:
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
+        - mountPath: /usr/bin
+          name: host-usr-bin
+        - mountPath: /run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       containers:
       - name: contrail-controller-config-api
         image: "{{ contrail_registry }}/contrail-controller-config-api:{{ contrail_container_tag }}"
@@ -367,6 +382,9 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret

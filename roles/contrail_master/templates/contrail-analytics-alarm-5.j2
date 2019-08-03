@@ -49,6 +49,12 @@ spec:
           name: host-usr-bin
         - mountPath: /host/var/lib
           name: host-var-lib
+        - mountPath: /usr/bin
+          name: host-usr-bin
+        - mountPath: /run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       - name: contrail-kafka-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
         command: ["mkdir","-pm","777","/host/var/lib/contrail/kafka-logs"]
@@ -144,6 +150,10 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
+
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret
