@@ -1,0 +1,147 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6de9a88a_87def755",
+        "filename": "playbooks/openshift-node/private/contrail_sanitize.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "./playbooks/byo/calico/roles/cockpit/tasks/firewall.yml\ncheck this file and use the firewalld module",
+      "range": {
+        "startLine": 11,
+        "startChar": 6,
+        "endLine": 11,
+        "endChar": 73
+      },
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70e85690_4edc9206",
+        "filename": "playbooks/openshift-node/private/contrail_sanitize.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "same as above, use firewalld module",
+      "range": {
+        "startLine": 16,
+        "startChar": 6,
+        "endLine": 16,
+        "endChar": 38
+      },
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "608e02b9_eac07c45",
+        "filename": "roles/contrail_master/templates/contrail-agent-5.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "this is /var/run usually, but firewalld excepts /run ?.\ncan you try to do mount on /var/run or add another mount with /var/run",
+      "range": {
+        "startLine": 125,
+        "startChar": 10,
+        "endLine": 125,
+        "endChar": 25
+      },
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d37204a0_d8b9b48a",
+        "filename": "roles/contrail_master/templates/contrail-analytics-5.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "same as in previous file",
+      "range": {
+        "startLine": 52,
+        "startChar": 10,
+        "endLine": 52,
+        "endChar": 25
+      },
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "500a33f3_0787721a",
+        "filename": "roles/contrail_master/templates/contrail-analytics-alarm-5.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "remove newline",
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f993a8e_a53ba704",
+        "filename": "roles/contrail_master/templates/contrail-analytics-db-5.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "no new line here",
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb7ca2c5_0439d04f",
+        "filename": "roles/contrail_master/templates/contrail-config-db-5.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-06T07:42:54Z",
+      "side": 1,
+      "message": "no newline here",
+      "revId": "81997b538c8ae98cbf79bc55a15940488878d04b",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
