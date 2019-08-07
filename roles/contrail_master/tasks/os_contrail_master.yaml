@@ -91,6 +91,23 @@
   when: contrail_registry_username is defined
   ignore_errors: True
 
+- name: grep for 99-origin-dns.sh
+  command: grep -q "99-origin-dns.sh" /etc/resolv.conf
+  register: result
+  until: result.rc == 0
+  retries: 10
+  delay: 1
+  when: openshift_use_contrail | default(false) | bool
+
+- name: lock the resolv.conf
+  file:
+    path: /etc/resolv.conf
+    mode: 0644
+    attr: i
+  when:
+    - openshift_use_contrail | default(false) | bool
+    - result.rc == 0
+
 - name: Starting the contrail components on required nodes
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
   run_once: True

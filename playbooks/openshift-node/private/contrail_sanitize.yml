@@ -8,6 +8,26 @@
         - openshift_use_contrail | default(false) | bool
         - not os_firewall_use_firewalld | default(False) | bool
 
+- name: Locking resolv conf, so NM wont rewrite after vhost0
+  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
+  tasks:
+    - name: grep for 99-origin-dns.sh
+      command: grep -q "99-origin-dns.sh" /etc/resolv.conf
+      register: result
+      until: result.rc == 0
+      retries: 10
+      delay: 1
+      when: openshift_use_contrail | default(false) | bool
+
+    - name: lock the resolv.conf
+      file:
+        path: /etc/resolv.conf
+        mode: 0644
+        attr: i
+      when:
+        - openshift_use_contrail | default(false) | bool
+        - result.rc == 0
+
 - name: Contrail wait for come up
   hosts: oo_first_master
   tasks:
