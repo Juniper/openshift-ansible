@@ -17,8 +17,8 @@ openshift_disable_check=memory_availability,package_availability,disk_availabili
 openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 
 # Redhat customer credentials
-oreg_auth_user=<>
-oreg_auth_password=<>
+oreg_auth_user=contrail.systems
+oreg_auth_password=Embe1mpls_007
 ###########################################################################
 ### OpenShift Master Vars
 ###########################################################################
@@ -40,8 +40,8 @@ openshift_enable_unsupported_configurations=True
 
 contrail_version=5.1
 
-contrail_container_tag=rhel-5.1-76
-#contrail_registry="ci-repo.englab.juniper.net:5010"
+contrail_container_tag=master-818
+contrail_registry="ci-repo.englab.juniper.net:5010"
 #contrail_registry_username=<>
 #contrail_registry_password=<>
 # need to notify openshift to configure insecure registry as below
@@ -214,6 +214,9 @@ openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 openshift_prometheus_alertbuffer_storage_type='pvc'
 
+
+os_firewall_use_firewalld=true
+firewall_zone=public
 ###########################################################################
 ### OpenShift Hosts
 ###########################################################################
@@ -224,15 +227,15 @@ nodes
 nfs
 
 [masters]
-a5s38node3
+a6s41node1
 
 [etcd]
-a5s38node3
+a6s41node1
 
 [nodes]
-a5s38node3 openshift_node_group_name='node-config-master'
-a6s41node4 openshift_node_group_name='node-config-compute'
-a6s41node3 openshift_node_group_name='node-config-infra'
+a6s41node1 openshift_node_group_name='node-config-master'
+a6s4node1 openshift_node_group_name='node-config-compute'
+a6s41node2 openshift_node_group_name='node-config-infra'
 
 [nfs]
-a6s41node4
+a6s4node1
