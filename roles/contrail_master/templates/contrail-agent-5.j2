@@ -89,7 +89,7 @@ spec:
           value: contrail-controller-config
         - name: DEPENDENCY_CONTAINER
         - name: COMMAND
-          value: echo done
+          value: sleep 250
         volumeMounts:
         - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
           name: pod-secret
