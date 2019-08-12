@@ -24,18 +24,6 @@
       when: openshift_use_contrail | default(false) | bool
       ignore_errors: True
 
-- name: Contrail Restarting dnsmasq service
-  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
-  tasks:
-    - name: Restart dnsmasq
-      service:
-        name: "dnsmasq"
-        state: restarted
-        enabled: yes
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-
 - name: Contrail Sanitize schema transformer
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
   roles:

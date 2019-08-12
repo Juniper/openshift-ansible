@@ -50,15 +50,15 @@ data:
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
-  name: contrail-agent
+  name: contrail-vrouter-nodemgr
   namespace: contrail-system
   labels:
-    app: contrail-agent
+    app: contrail-vrouter-nodemgr
 spec:
   template:
     metadata:
       labels:
-        app: contrail-agent
+        app: contrail-vrouter-nodemgr
     spec:
       automountServiceAccountToken: false
       hostNetwork: true
@@ -86,7 +86,7 @@ spec:
         - name: DEPENDENCY_SERVICE
         - name: DEPENDENCY_JOBS
         - name: DEPENDENCY_DAEMONSET
-          value: contrail-controller-config
+          value: contrail-controller-config,contrail-analytics
         - name: DEPENDENCY_CONTAINER
         - name: COMMAND
           value: echo done
@@ -126,10 +126,6 @@ spec:
         command: ["/bin/true"]
       - name: contrail-download-contrail-kubernetes-cni-init-image
         image: "{{ contrail_registry }}/contrail-kubernetes-cni-init:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        command: ["/bin/true"]
-      - name: contrail-download-contrail-vrouter-agent-image
-        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         command: ["/bin/true"]
       - name: contrail-download-contrail-nodemgr-image
@@ -175,37 +171,6 @@ spec:
         - mountPath: /host/usr/bin
           name: host-usr-bin
       containers:
-      - name: contrail-vrouter-agent
-        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
-        imagePullPolicy: "IfNotPresent"
-        # TODO: Priveleged mode is requied because w/o it the device /dev/net/tun
-        # is not present in the container. The mounting it into container
-        # doesnt help because of permissions are not enough syscalls,
-        # e.g. https://github.com/Juniper/contrail-controller/blob/master/src/vnsw/agent/contrail/linux/pkt0_interface.cc: 48.
-        securityContext:
-          privileged: true
-        envFrom:
-        - configMapRef:
-            name: agent-env
-        volumeMounts:
-        - mountPath: /dev
-          name: dev
-        - mountPath: /etc/sysconfig/network-scripts
-          name: network-scripts
-        - mountPath: /host/bin
-          name: host-bin
-        - mountPath: /var/log/contrail
-          name: agent-logs
-        - mountPath: /usr/src
-          name: usr-src
-        - mountPath: /lib/modules
-          name: lib-modules
-        - mountPath: /var/lib/contrail
-          name: var-lib-contrail
-        - mountPath: /var/crashes
-          name: var-crashes
-        - mountPath: /etc/localtime
-          name: localtime
       - name: contrail-agent-nodemgr
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
@@ -271,6 +236,131 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: pod-secret
+        secret:
+          secretName: contrail-kubernetes-token
+      - name: localtime
+        hostPath:
+          path: /etc/localtime
+{% if contrail_registry_username is defined and contrail_registry_password %}
+      imagePullSecrets:
+      - name: contrail-registry-secret
+{% endif %}
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: contrail-agent
+  namespace: contrail-system
+  labels:
+    app: contrail-agent
+spec:
+  template:
+    metadata:
+      labels:
+        app: contrail-agent
+    spec:
+      automountServiceAccountToken: false
+      hostNetwork: true
+      initContainers:
+      - name: kubernetes-entrypoint-init
+        image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          privileged: true
+        command:
+        - kubernetes-entrypoint
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        #- name: INTERFACE_NAME
+        #  value: eth0
+        - name: DEPENDENCY_SERVICE
+        - name: DEPENDENCY_JOBS
+        - name: DEPENDENCY_DAEMONSET
+          value: contrail-controller-control,contrail-vrouter-nodemgr
+        - name: DEPENDENCY_CONTAINER
+        - name: COMMAND
+          value: echo done
+        volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: pod-secret
+      - name: contrail-download-contrail-status-image
+        image: "{{ contrail_registry }}/contrail-status:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      - name: contrail-download-contrail-vrouter-agent-image
+        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+      containers:
+      - name: contrail-vrouter-agent
+        image: "{{ contrail_registry }}/contrail-vrouter-agent:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        # TODO: Priveleged mode is requied because w/o it the device /dev/net/tun
+        # is not present in the container. The mounting it into container
+        # doesnt help because of permissions are not enough syscalls,
+        # e.g. https://github.com/Juniper/contrail-controller/blob/master/src/vnsw/agent/contrail/linux/pkt0_interface.cc: 48.
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        volumeMounts:
+        - mountPath: /dev
+          name: dev
+        - mountPath: /etc/sysconfig/network-scripts
+          name: network-scripts
+        - mountPath: /host/bin
+          name: host-bin
+        - mountPath: /var/log/contrail
+          name: agent-logs
+        - mountPath: /usr/src
+          name: usr-src
+        - mountPath: /lib/modules
+          name: lib-modules
+        - mountPath: /var/lib/contrail
+          name: var-lib-contrail
+        - mountPath: /var/crashes
+          name: var-crashes
+        - mountPath: /etc/localtime
+          name: localtime
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: network-scripts
+        hostPath:
+          path: /etc/sysconfig/network-scripts
+      - name: host-bin
+        hostPath:
+          path: /bin
+      - name: docker-unix-socket
+        hostPath:
+          path: /var/run
+      - name: usr-src
+        hostPath:
+          path: /usr/src
+      - name: lib-modules
+        hostPath:
+          path: /lib/modules
+      - name: var-lib-contrail
+        hostPath:
+          path: /var/lib/contrail
+      - name: var-crashes
+        hostPath:
+          path: /var/contrail/crashes
+      - name: agent-logs
+        hostPath:
+          path: /var/log/contrail/agent
       - name: pod-secret
         secret:
           secretName: contrail-kubernetes-token
