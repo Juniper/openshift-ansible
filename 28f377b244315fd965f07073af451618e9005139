@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0622c7f_5612a1c4",
+        "filename": "inventory/ose-install",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-13T22:31:58Z",
+      "side": 1,
+      "message": "can you remove the user and password values please, security risk :D",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 32
+      },
+      "revId": "28f377b244315fd965f07073af451618e9005139",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7c4cf50_fdb18382",
+        "filename": "playbooks/openshift-node/private/contrail_sanitize.yml",
+        "patchSetId": 2
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-13T22:31:58Z",
+      "side": 1,
+      "message": "why is a debugger here ? , did you run without the debugger or with the debugger ?",
+      "range": {
+        "startLine": 4,
+        "startChar": 2,
+        "endLine": 4,
+        "endChar": 18
+      },
+      "revId": "28f377b244315fd965f07073af451618e9005139",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
