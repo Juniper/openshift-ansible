@@ -63,36 +63,6 @@ spec:
       automountServiceAccountToken: false
       hostNetwork: true
       initContainers:
-      - name: kubernetes-entrypoint-init
-        image: quay.io/stackanetes/kubernetes-entrypoint:v0.2.1
-        imagePullPolicy: IfNotPresent
-        securityContext:
-          privileged: true
-        command:
-        - kubernetes-entrypoint
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        #- name: INTERFACE_NAME
-        #  value: eth0
-        - name: DEPENDENCY_SERVICE
-        - name: DEPENDENCY_JOBS
-        - name: DEPENDENCY_DAEMONSET
-          value: contrail-controller-config
-        - name: DEPENDENCY_CONTAINER
-        - name: COMMAND
-          value: sleep 250
-        volumeMounts:
-        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
-          name: pod-secret
       - name: contrail-node-init
         image: "{{ contrail_registry }}/contrail-node-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
