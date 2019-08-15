@@ -33,7 +33,7 @@
     path: "/etc/origin/master"
     state: directory
 
-- name: Copy recyler pod to config directory
+- name: Copy recycler pod to config directory
   template:
     src: "recycler_pod.yaml.j2"
     dest: "/etc/origin/master/recycler_pod.yaml"
@@ -62,6 +62,17 @@
   - openshift.master.audit_config.auditFilePath is defined
   - '"/var/log/origin" in openshift.master.audit_config.auditFilePath'
 
+- name: Copy openshift audit policy file
+  copy:
+    src: "{{ openshift.master.audit_policyfile }}"
+    dest: "{{ openshift.master.audit_config.policyFile }}"
+    mode: 0644
+  when:
+  - openshift.master.audit_config is defined
+  - openshift.master.audit_policyfile is defined
+  - openshift.master.audit_config.policyFile is defined
+  - '"/etc/origin/master" in openshift.master.audit_config.policyFile'
+
 - name: Create the policy file if it does not already exist
   command: >
     {{ openshift_client_binary }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig
@@ -83,6 +94,12 @@
   when: openshift_encryption_config is defined
 
 - import_tasks: htpass_provider.yml
+
+- name: Create AWS Custom CA if specified
+  copy:
+    dest: "/etc/origin/master/aws_ca_bundle.crt"
+    src: "{{ openshift_cloudprovider_aws_ca_bundle }}"
+  when: openshift_cloudprovider_aws_ca_bundle is defined
 
 - name: Create the ldap ca file if needed
   copy:
@@ -131,6 +148,7 @@
 - name: Set fact of all etcd host IPs
   openshift_facts:
     role: common
+    system_facts: "{{ vars_openshift_facts_system_facts }}"
     local_facts:
       no_proxy_etcd_host_ips: "{{ openshift_no_proxy_etcd_host_ips }}"
 
@@ -207,9 +225,9 @@
     namespace: kube-system
   register: control_plane_pods
   until:
-  - "'results' in control_plane_pods"
-  - "'results' in control_plane_pods.results"
-  - control_plane_pods.results.results | length > 0
+  - control_plane_pods.module_results is defined
+  - control_plane_pods.module_results.results is defined
+  - control_plane_pods.module_results.results | length > 0
   retries: 60
   delay: 5
   with_items:
@@ -259,12 +277,12 @@
     namespace: kube-system
   register: control_plane_health
   until:
-  - "'results' in control_plane_health"
-  - "'results' in control_plane_health.results"
-  - control_plane_health.results.results | length > 0
-  - "'status' in control_plane_health.results.results[0]"
-  - "'conditions' in control_plane_health.results.results[0].status"
-  - control_plane_health.results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
+  - control_plane_health.module_results is defined
+  - control_plane_health.module_results.results is defined
+  - control_plane_health.module_results.results | length > 0
+  - control_plane_health.module_results.results[0].status is defined
+  - control_plane_health.module_results.results[0].status.conditions is defined
+  - control_plane_health.module_results.results[0].status.conditions | selectattr('type', 'match', '^Ready$') | map(attribute='status') | join | bool == True
   retries: 60
   delay: 5
   with_items:

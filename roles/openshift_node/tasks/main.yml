@@ -1,10 +1,4 @@
 ---
-- fail:
-    msg: "SELinux is disabled, This deployment type requires that SELinux is enabled."
-  when:
-    - (not ansible_selinux or ansible_selinux.status != 'enabled')
-    - openshift_deployment_type == 'openshift-enterprise'
-    - not openshift_use_crio | bool
 
 - import_tasks: dnsmasq_install.yml
 - import_tasks: dnsmasq.yml
@@ -68,18 +62,20 @@
 
 #### Storage class plugins here ####
 - name: NFS storage plugin configuration
-  import_tasks: storage_plugins/nfs.yml
+  import_tasks: storage_plugin_nfs.yml
 
 - name: GlusterFS storage plugin configuration
   import_tasks: glusterfs.yml
   when: "'glusterfs' in osn_storage_plugin_deps"
 
 - name: Ceph storage plugin configuration
-  import_tasks: storage_plugins/ceph.yml
+  import_tasks: storage_plugin_ceph.yml
   when: "'ceph' in osn_storage_plugin_deps"
 
 - name: iSCSI storage plugin configuration
-  import_tasks: storage_plugins/iscsi.yml
-  when: "'iscsi' in osn_storage_plugin_deps"
+  import_tasks: storage_plugin_iscsi.yml
+  when:
+    - "'iscsi' in osn_storage_plugin_deps"
+    - not openshift_is_atomic | bool
 
 ##### END Storage #####

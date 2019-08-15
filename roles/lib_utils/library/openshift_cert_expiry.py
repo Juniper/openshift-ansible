@@ -52,6 +52,7 @@ description:
   - C(days_remaining) - The number of days until the certificate expires.
   - C(expiry) - The date the certificate expires on.
   - C(path) - The full path to the certificate on the examined host.
+  - C(issuer) - Certification Authority used to sign the certificate
 version_added: "1.0"
 options:
   config_base:
@@ -99,6 +100,7 @@ platforms missing the Python OpenSSL library.
         self.subject = None
         self.extensions = []
         self.not_after = None
+        self.issuer = None
         self._parse_cert()
 
     def _parse_cert(self):
@@ -157,6 +159,10 @@ platforms missing the Python OpenSSL library.
                 # O = system:nodes, CN = system:node:m01.example.com
                 self.subject = FakeOpenSSLCertificateSubjects(l.partition(': ')[-1])
 
+            elif l.startswith('Issuer:'):
+                # Issuer: C=ES, ST=Madrid, L=Madrid, O=OGTLabs, OU=Devops, CN=OGTLabs Root CA
+                self.issuer = l.partition(': ')[-1]
+
     def get_serial_number(self):
         """Return the serial number of the cert"""
         return self.serial
@@ -185,6 +191,10 @@ might return: [('O=system', 'nodes'), ('CN=system', 'node:m01.example.com')]
 '20180922170439Z'. strptime the result with format param:
 '%Y%m%d%H%M%SZ'."""
         return self.not_after
+
+    def get_issuer(self):
+        """Returns the CA used to sign the certificate"""
+        return self.issuer
 
 
 class FakeOpenSSLCertificateSANExtension(object):  # pylint: disable=too-few-public-methods
@@ -253,7 +263,7 @@ Params:
 
 Returns:
 A tuple of the form:
-    (cert_subject, cert_expiry_date, time_remaining, cert_serial_number)
+    (cert_subject, cert_expiry_date, time_remaining, cert_serial_number, issuer)
     """
     if base64decode:
         _cert_string = base64.b64decode(cert_string).decode('utf-8')
@@ -267,7 +277,7 @@ A tuple of the form:
     if HAS_OPENSSL:
         # No work-around required
         cert_loaded = OpenSSL.crypto.load_certificate(
-            OpenSSL.crypto.FILETYPE_PEM, _cert_string)
+            OpenSSL.crypto.FILETYPE_PEM, _cert_string.encode('utf-8'))
     else:
         # Missing library, work-around required. Run the 'openssl'
         # command on it to decode it
@@ -289,7 +299,7 @@ A tuple of the form:
         if isinstance(name, bytes) or isinstance(value, bytes):
             name = name.decode('utf-8')
             value = value.decode('utf-8')
-        cert_subjects.append('{}:{}'.format(name, value))
+        cert_subjects.append(u'{}:{}'.format(name, value))
 
     # To read SANs from a cert we must read the subjectAltName
     # extension from the X509 Object. What makes this more difficult
@@ -307,7 +317,7 @@ A tuple of the form:
         # to the list of existing names
         cert_subjects.extend(str(san).split(', '))
 
-    cert_subject = ', '.join(cert_subjects)
+    cert_subject = u', '.join(cert_subjects)
     ######################################################################
 
     # Grab the expiration date
@@ -322,7 +332,19 @@ A tuple of the form:
 
     time_remaining = cert_expiry_date - now
 
-    return (cert_subject, cert_expiry_date, time_remaining, cert_loaded.get_serial_number())
+    # Grab the Issuer
+    # Depending of the method used to obtain the cert, issuer will be
+    # a unicode object or a OpenSSL.crypto.X509Name
+    if not HAS_OPENSSL:
+        issuer_raw = cert_loaded.get_issuer()
+        issuer = str(issuer_raw)
+    else:
+        issuer_raw = cert_loaded.get_issuer().get_components()
+        issuer = ""
+        for x, y in issuer_raw:
+            issuer += str(x) + "=" + str(y) + " "
+
+    return (cert_subject, cert_expiry_date, time_remaining, cert_loaded.get_serial_number(), issuer)
 
 
 def classify_cert(cert_meta, now, time_remaining, expire_window, cert_list):
@@ -537,6 +559,13 @@ an OpenShift Container Platform cluster
             if proxyClient:
                 cert_meta['proxyClient'] = os.path.join(cfg_path, proxyClient)
 
+            namedCertificates = cfg.get('servingInfo', {}).get('namedCertificates', [])
+            if namedCertificates:
+                for i, v in enumerate(namedCertificates):
+                    if 'certFile' in v:
+                        namedCertKey = 'namedCertificate-{}'.format(i)
+                        cert_meta[namedCertKey] = os.path.join(cfg_path, v.get('certFile'))
+
         ######################################################################
         # Load the certificate and the CA, parse their expiration dates into
         # datetime objects so we can manipulate them later
@@ -546,7 +575,8 @@ an OpenShift Container Platform cluster
                 (cert_subject,
                  cert_expiry_date,
                  time_remaining,
-                 cert_serial) = load_and_handle_cert(cert, now, ans_module=module)
+                 cert_serial,
+                 issuer) = load_and_handle_cert(cert, now, ans_module=module)
 
                 expire_check_result = {
                     'cert_cn': cert_subject,
@@ -554,7 +584,8 @@ an OpenShift Container Platform cluster
                     'expiry': cert_expiry_date,
                     'days_remaining': time_remaining.days,
                     'health': None,
-                    'serial': cert_serial
+                    'serial': cert_serial,
+                    'issuer': issuer
                 }
 
                 classify_cert(expire_check_result, now, time_remaining, expire_window, ocp_certs)
@@ -599,7 +630,8 @@ an OpenShift Container Platform cluster
             (cert_subject,
              cert_expiry_date,
              time_remaining,
-             cert_serial) = load_and_handle_cert(c, now, base64decode=True, ans_module=module)
+             cert_serial,
+             issuer) = load_and_handle_cert(c, now, base64decode=True, ans_module=module)
 
             expire_check_result = {
                 'cert_cn': cert_subject,
@@ -607,7 +639,8 @@ an OpenShift Container Platform cluster
                 'expiry': cert_expiry_date,
                 'days_remaining': time_remaining.days,
                 'health': None,
-                'serial': cert_serial
+                'serial': cert_serial,
+                'issuer': issuer
             }
 
             classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
@@ -629,7 +662,8 @@ an OpenShift Container Platform cluster
         (cert_subject,
          cert_expiry_date,
          time_remaining,
-         cert_serial) = load_and_handle_cert(c, now, base64decode=True, ans_module=module)
+         cert_serial,
+         issuer) = load_and_handle_cert(c, now, base64decode=True, ans_module=module)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -637,7 +671,8 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
-            'serial': cert_serial
+            'serial': cert_serial,
+            'issuer': issuer
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, kubeconfigs)
@@ -685,7 +720,8 @@ an OpenShift Container Platform cluster
             (cert_subject,
              cert_expiry_date,
              time_remaining,
-             cert_serial) = load_and_handle_cert(c, now, ans_module=module)
+             cert_serial,
+             issuer) = load_and_handle_cert(c, now, ans_module=module)
 
             expire_check_result = {
                 'cert_cn': cert_subject,
@@ -693,7 +729,8 @@ an OpenShift Container Platform cluster
                 'expiry': cert_expiry_date,
                 'days_remaining': time_remaining.days,
                 'health': None,
-                'serial': cert_serial
+                'serial': cert_serial,
+                'issuer': issuer
             }
 
             classify_cert(expire_check_result, now, time_remaining, expire_window, etcd_certs)
@@ -731,7 +768,8 @@ an OpenShift Container Platform cluster
         (cert_subject,
          cert_expiry_date,
          time_remaining,
-         cert_serial) = load_and_handle_cert(router_c, now, base64decode=True, ans_module=module)
+         cert_serial,
+         issuer) = load_and_handle_cert(router_c, now, base64decode=True, ans_module=module)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -739,7 +777,8 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
-            'serial': cert_serial
+            'serial': cert_serial,
+            'issuer': issuer
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, router_certs)
@@ -762,7 +801,8 @@ an OpenShift Container Platform cluster
         (cert_subject,
          cert_expiry_date,
          time_remaining,
-         cert_serial) = load_and_handle_cert(registry_c, now, base64decode=True, ans_module=module)
+         cert_serial,
+         issuer) = load_and_handle_cert(registry_c, now, base64decode=True, ans_module=module)
 
         expire_check_result = {
             'cert_cn': cert_subject,
@@ -770,7 +810,8 @@ an OpenShift Container Platform cluster
             'expiry': cert_expiry_date,
             'days_remaining': time_remaining.days,
             'health': None,
-            'serial': cert_serial
+            'serial': cert_serial,
+            'issuer': issuer
         }
 
         classify_cert(expire_check_result, now, time_remaining, expire_window, registry_certs)

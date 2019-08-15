@@ -23,7 +23,7 @@ openshift_additional_registry_credentials: []
 l_os_non_standard_reg_url: "{{ oreg_url | default(l_osm_registry_url_default) }}"
 
 l_docker_creds_image_dict:
-  openshift-enterprise: 'openshift3/ose'
+  openshift-enterprise: 'openshift3/ose-pod'
   origin: 'openshift/origin'
 l_docker_creds_test_image: "{{ l_docker_creds_image_dict[openshift_deployment_type] }}"
 
@@ -139,6 +139,7 @@ openshift_service_type: "{{ openshift_service_type_dict[openshift_deployment_typ
 openshift_master_api_port: "8443"
 openshift_ca_host: "{{ groups.oo_first_master.0 }}"
 openshift_use_openshift_sdn: true
+openshift_sdn_vxlan_port: "4789"
 os_sdn_network_plugin_name: "redhat/openshift-ovs-subnet"
 
 openshift_node_groups:

@@ -18,11 +18,11 @@ class PolicyUserConfig(OpenShiftCLIConfig):
     def get_kind(self):
         ''' return the kind we are working with '''
         if self.config_options['resource_kind']['value'] == 'role':
-            return 'rolebinding'
+            return 'rolebinding.rbac.authorization.k8s.io'
         elif self.config_options['resource_kind']['value'] == 'cluster-role':
-            return 'clusterrolebinding'
+            return 'clusterrolebinding.rbac.authorization.k8s.io'
         elif self.config_options['resource_kind']['value'] == 'scc':
-            return 'scc'
+            return 'scc.security.openshift.io'
 
         return None
 
@@ -200,7 +200,7 @@ class PolicyUser(OpenShiftCLI):
             if api_rval['returncode'] != 0:
                 return {'msg': api_rval}
 
-            return {'changed': True, 'results' : api_rval, state:'absent'}
+            return {'changed': True, 'module_results': api_rval, 'state': 'absent'}
 
         if state == 'present':
             ########
@@ -220,8 +220,8 @@ class PolicyUser(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, state: 'present'}
+                return {'changed': True, 'module_results': api_rval, 'state': 'present'}
 
             return {'changed': False, state: 'present'}
 
-        return {'failed': True, 'changed': False, 'results': 'Unknown state passed. %s' % state, state: 'unknown'}
+        return {'failed': True, 'changed': False, 'msg': 'Unknown state passed. %s' % state, 'state': 'unknown'}

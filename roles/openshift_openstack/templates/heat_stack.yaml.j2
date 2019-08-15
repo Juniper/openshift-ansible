@@ -226,6 +226,57 @@ resources:
 {% endif %}
 
 {% if not openshift_openstack_provider_network_name %}
+
+{% if not openshift_openstack_node_subnet_name %}
+  net:
+    type: OS::Neutron::Net
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-net
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+
+  subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-subnet
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      network: { get_resource: net }
+      cidr: {{ openshift_openstack_subnet_cidr }}
+      allocation_pools:
+        - start: {{ openshift_openstack_pool_start }}
+          end: {{ openshift_openstack_pool_end }}
+      dns_nameservers:
+{% for nameserver in openshift_openstack_dns_nameservers %}
+        - {{ nameserver }}
+{% endfor %}
+{% endif %}
+
+{% if not openshift_openstack_router_name %}
+  router:
+    type: OS::Neutron::Router
+    properties:
+      name:
+        str_replace:
+          template: openshift-ansible-cluster_id-router
+          params:
+            cluster_id: {{ openshift_openstack_full_dns_domain }}
+      external_gateway_info:
+        network: {{ openshift_openstack_external_network_name }}
+
+  interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: subnet }
+{% endif %}
+
+{% endif %}
+
 {% if openshift_use_kuryr|default(false)|bool %}
   pod_net:
     type: OS::Neutron::Net
@@ -344,37 +395,6 @@ resources:
 
 {% endif %}
 
-{% if not openshift_openstack_node_subnet_name %}
-  net:
-    type: OS::Neutron::Net
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-net
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-{% endif %}
-
-{% if not openshift_openstack_node_subnet_name %}
-  subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-subnet
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-      network: { get_resource: net }
-      cidr: {{ openshift_openstack_subnet_cidr }}
-      allocation_pools:
-        - start: {{ openshift_openstack_pool_start }}
-          end: {{ openshift_openstack_pool_end }}
-      dns_nameservers:
-{% for nameserver in openshift_openstack_dns_nameservers %}
-        - {{ nameserver }}
-{% endfor %}
-{% endif %}
-
 {% if openshift_use_flannel|default(False)|bool %}
   data_net:
     type: OS::Neutron::Net
@@ -389,25 +409,6 @@ resources:
       network: { get_resource: data_net }
       cidr: {{ openshift_cluster_network_cidr }}
       gateway_ip: null
-{% endif %}
-
-{% if not openshift_openstack_router_name %}
-  router:
-    type: OS::Neutron::Router
-    properties:
-      name:
-        str_replace:
-          template: openshift-ansible-cluster_id-router
-          params:
-            cluster_id: {{ openshift_openstack_full_dns_domain }}
-      external_gateway_info:
-        network: {{ openshift_openstack_external_network_name }}
-
-  interface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: { get_resource: router }
-      subnet_id: { get_resource: subnet }
 {% endif %}
 
 {% if openshift_use_kuryr|default(false)|bool %}
@@ -443,8 +444,6 @@ resources:
       router_id: {{ openshift_openstack_router_id }}
 {% endif %}
       port: { get_resource: service_router_port }
-{% endif %}
-
 {% endif %}
 
 #  keypair:
@@ -489,7 +488,7 @@ resources:
         remote_ip_prefix: {{ openshift_openstack_subnet_cidr }}
 {% if openshift_kuryr_sg_driver|default('default') != 'namespace' %}
       - ethertype: IPv4
-        remote_mode: remote_group_id
+        remote_ip_prefix: {{ openshift_openstack_kuryr_pod_subnet_cidr }}
 {% endif %}
 {% endif %}
 
@@ -580,7 +579,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_infra_secgroup_rules|to_json }}
-  {% if openshift_openstack_num_cns > 0 %}
+{% if openshift_openstack_num_cns > 0 %}
   cns-secgrp:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -595,7 +594,7 @@ resources:
           params:
             cluster_id: {{ openshift_openstack_full_dns_domain }}
       rules: {{ openshift_openstack_cns_secgroup_rules|to_json }}
-  {% endif %}
+{% endif %}
 {% endif %}
 
   lb-secgrp:

@@ -7,6 +7,7 @@
     name: "{{ item.name | default(omit) }}"
     selector: "{{ item.selector | default(omit) }}"
     state: absent
+    force: yes
   with_items:
   - kind: "template,route,service,dc,jobs,secret"
     selector: "deploy-heketi"
@@ -41,6 +42,8 @@
     name: "glusterfs-{{ glusterfs_name }}"
   - kind: storageclass
     name: "glusterfs-{{ glusterfs_name }}"
+  - kind: storageclass
+    name: "glusterfs-{{ glusterfs_name }}-block"
 
 - name: Unlabel GlusterFS nodes
   oc_label:
@@ -105,33 +108,25 @@
   when:
   - not glusterfs_is_native | bool
 
-- name: Delete GlusterFS config
+- name: Delete GlusterFS directories
   file:
-    path: /var/lib/glusterd
+    path: "{{ item[1] }}"
     state: absent
-  delegate_to: "{{ item }}"
-  with_items: "{{ glusterfs_nodes | default([]) }}"
+  delegate_to: "{{ item[0] }}"
+  with_nested:
+  - "{{ glusterfs_nodes | default([]) }}"
+  - [ '/var/lib/glusterd', '/etc/glusterfs', '/var/lib/heketi' ]
 
-- name: Delete additional GlusterFS config
+- name: Restore GlusterFS directories (external)
   file:
-    path: /etc/glusterfs
-    state: absent
-  delegate_to: "{{ item }}"
-  with_items: "{{ glusterfs_nodes | default([]) }}"
-
-- name: Delete Heketi config
-  file:
-    path: /var/lib/heketi
-    state: absent
-  delegate_to: "{{ item }}"
-  with_items: "{{ glusterfs_nodes | default([]) }}"
-
-- name: Delete Glusterfs logs
-  file:
-    path: /var/log/glusterfs
-    state: absent
-  delegate_to: "{{ item }}"
-  with_items: "{{ glusterfs_nodes | default([]) }}"
+    path: "{{ item[1] }}"
+    state: directory
+  delegate_to: "{{ item[0] }}"
+  with_nested:
+  - "{{ glusterfs_nodes | default([]) }}"
+  - [ '/var/lib/glusterd', '/etc/glusterfs', '/var/lib/heketi' ]
+  when:
+  - not glusterfs_is_native | bool
 
 # This recreates expected directory structures
 - name: Reinstall GlusterFS Server (external)

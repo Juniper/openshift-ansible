@@ -52,7 +52,7 @@ def main():
             router_id=dict(default=False, type='str'),
             subnet_id=dict(default=False, type='str'),
             net_id=dict(default=False, type='str'),
-            sg_id=dict(default=False, type='str'),
+            sg_id=dict(default=None, type='str'),
         ),
         supports_check_mode=True,
     )
@@ -93,7 +93,8 @@ def main():
         module.fail_json(msg='Failed to delete Neutron Network associated to the namespace')
 
     try:
-        adapter.delete('/security-groups/' + module.params['sg_id'])
+        if module.params.get('sg_id'):
+            adapter.delete('/security-groups/' + module.params['sg_id'])
     # pylint: disable=broad-except
     except Exception:
         module.fail_json(msg='Failed to delete Security groups associated to the namespace')

@@ -131,7 +131,7 @@ debug_level=2
 
 # Specify exact version of Docker to configure or upgrade to.
 # Downgrades are not supported and will error out. Be careful when upgrading docker from < 1.10 to > 1.10.
-# docker_version="1.12.1"
+# docker_version="1.13.1"
 
 # Specify whether to run Docker daemon with SELinux enabled in containers. Default is True.
 # Uncomment below to disable; for example if your kernel does not support the
@@ -285,6 +285,10 @@ debug_level=2
 # Note: IAM profiles may be used instead of storing API credentials on disk.
 #openshift_cloudprovider_aws_access_key=aws_access_key_id
 #openshift_cloudprovider_aws_secret_key=aws_secret_access_key
+# If a custom CA is required for your AWS endpoint, this is copied to
+# /etc/origin/{master,node}/aws_ca_bundle.crt and configured via the envvar
+# AWS_CA_BUNDLE for master and node.
+#openshift_cloudprovider_aws_ca_bundle=/path/to/aws_ca_bundle.crt
 #
 # Openstack
 #openshift_cloudprovider_kind=openstack
@@ -668,10 +672,18 @@ debug_level=2
 # openshift_cluster_monitoring_operator_install=false
 #
 # Cluster monitoring configuration variables allow setting the amount of
-# storage requested through PersistentVolumeClaims.
+# storage and storageclass requested through PersistentVolumeClaims.
 #
 # openshift_cluster_monitoring_operator_prometheus_storage_capacity="50Gi"
 # openshift_cluster_monitoring_operator_alertmanager_storage_capacity="2Gi"
+#
+# openshift_cluster_monitoring_operator_prometheus_storage_class_name=""
+# openshift_cluster_monitoring_operator_alertmanager_storage_class_name=""
+
+# Update the time to wait for CRD to be creating by setting
+# openshift_cluster_monitoring_operator_crd_retries=30
+# openshift_cluster_monitoring_operator_crd_delay=30
+
 
 # Logging deployment
 #
@@ -838,11 +850,6 @@ debug_level=2
 # configure how often node iptables rules are refreshed
 #openshift_node_iptables_sync_period=5s
 
-# Configure nodeIP in the node config
-# This is needed in cases where node traffic is desired to go over an
-# interface other than the default network interface.
-#openshift_set_node_ip=True
-
 #openshift_node_kubelet_args is deprecated, use node config edits instead
 
 # Configure logrotate scripts
@@ -948,13 +955,13 @@ debug_level=2
 #openshift_node_env_vars={"ENABLE_HTTP2": "true"}
 
 # Enable API service auditing
-#openshift_master_audit_config={"enabled": "true"}
+#openshift_master_audit_config={"enabled": true}
 #
 # In case you want more advanced setup for the auditlog you can
 # use this line.
 # The directory in "auditFilePath" will be created if it's not
 # exist
-#openshift_master_audit_config={"enabled": "true", "auditFilePath": "/var/lib/origin/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": "14", "maximumFileSizeMegabytes": "500", "maximumRetainedFiles": "5"}
+#openshift_master_audit_config={"enabled": true, "auditFilePath": "/var/lib/origin/openpaas-oscp-audit/openpaas-oscp-audit.log", "maximumFileRetentionDays": 14, "maximumFileSizeMegabytes": 500, "maximumRetainedFiles": 5}
 
 # Enable origin repos that point at Centos PAAS SIG, defaults to true, only used
 # by openshift_deployment_type=origin

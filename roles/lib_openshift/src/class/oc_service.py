@@ -84,7 +84,7 @@ class OCService(OpenShiftCLI):
 
     def needs_update(self):
         ''' verify an update is needed '''
-        skip = ['clusterIP', 'portalIP']
+        skip = ['clusterIP', 'portalIP', 'sessionAffinityConfig']
         return not Utils.check_def_equal(self.user_svc.yaml_dict, self.service.yaml_dict, skip_keys=skip, debug=True)
 
     # pylint: disable=too-many-return-statements,too-many-branches
@@ -116,7 +116,7 @@ class OCService(OpenShiftCLI):
         # Get
         #####
         if state == 'list':
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         ########
         # Delete
@@ -130,7 +130,7 @@ class OCService(OpenShiftCLI):
 
                 api_rval = oc_svc.delete()
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             return {'changed': False, 'state': state}
 
@@ -156,7 +156,7 @@ class OCService(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
             ########
             # Update
@@ -173,8 +173,8 @@ class OCService(OpenShiftCLI):
                 if api_rval['returncode'] != 0:
                     return {'failed': True, 'msg': api_rval}
 
-                return {'changed': True, 'results': api_rval, 'state': state}
+                return {'changed': True, 'module_results': api_rval, 'state': state}
 
-            return {'changed': False, 'results': api_rval, 'state': state}
+            return {'changed': False, 'module_results': api_rval, 'state': state}
 
         return {'failed': True, 'msg': 'UNKNOWN state passed. [%s]' % state}

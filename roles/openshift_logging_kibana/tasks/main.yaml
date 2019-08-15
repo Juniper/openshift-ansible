@@ -11,7 +11,7 @@
     msg: "Provided value for 'openshift_logging_kibana_session_timeout_seconds' is invalid. Only positive integers are allowed."
 
 - name: Ensure that Kibana has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
@@ -44,6 +44,8 @@
     name: "aggregated-logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
     image_pull_secrets: "{{ openshift_logging_kibana_image_pull_secret }}"
+    secrets:
+      - logging-kibana
   when: openshift_logging_kibana_image_pull_secret != ''
 
 - name: Create Kibana service account
@@ -51,6 +53,8 @@
     state: present
     name: "aggregated-logging-kibana"
     namespace: "{{ openshift_logging_namespace }}"
+    secrets:
+      - logging-kibana
   when:
     - openshift_logging_kibana_image_pull_secret == ''
 
@@ -177,7 +181,7 @@
     kind: oauthclient
   register: oauth_client_list
 
-- set_fact: proxy_hostnames={{ oauth_client_list.results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
+- set_fact: proxy_hostnames={{ oauth_client_list.module_results.results[0].redirectURIs | default ([]) + ['https://' ~ openshift_logging_kibana_hostname] }}
 
 # create oauth client
 - name: Create oauth-client template
@@ -199,45 +203,8 @@
       - "{{ tempdir }}/templates/oauth-client.yml"
     delete_after: true
 
-# create Kibana secret
-- name: Set Kibana secret
-  oc_secret:
-    state: present
-    name: "logging-kibana"
-    namespace: "{{ openshift_logging_namespace }}"
-    files:
-      - name: ca
-        path: "{{ generated_certs_dir }}/ca.crt"
-      - name: key
-        path: "{{ generated_certs_dir }}/system.logging.kibana.key"
-      - name: cert
-        path: "{{ generated_certs_dir }}/system.logging.kibana.crt"
-
-# create Kibana-proxy secret
-- name: Set Kibana Proxy secret
-  oc_secret:
-    state: present
-    name: "logging-kibana-proxy"
-    namespace: "{{ openshift_logging_namespace }}"
-    # TODO: when possible to have both files and contents for oc_secret use this
-    #files:
-    #- name: server-key
-    #  path: "{{ generated_certs_dir }}/kibana-internal.key"
-    #- name: server-cert
-    #  path: "{{ generated_certs_dir }}/kibana-internal.crt"
-    #- name: server-tls.json
-    #  path: "{{ generated_certs_dir }}/server-tls.json"
-    contents:
-      - path: oauth-secret
-        data: "{{ key_pairs | entry_from_named_pair('oauth_secret') | b64decode }}"
-      - path: session-secret
-        data: "{{ key_pairs | entry_from_named_pair('session_secret') | b64decode }}"
-      - path: server-key
-        data: "{{ key_pairs | entry_from_named_pair('kibana_internal_key') | b64decode }}"
-      - path: server-cert
-        data: "{{ key_pairs | entry_from_named_pair('kibana_internal_cert') | b64decode }}"
-      - path: server-tls.json
-        data: "{{ key_pairs | entry_from_named_pair('server_tls') | b64decode }}"
+# create secrets
+- include_tasks: generate_secret.yaml
 
 # create Kibana DC
 - name: Generate Kibana DC template

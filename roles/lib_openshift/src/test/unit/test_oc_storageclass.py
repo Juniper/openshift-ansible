@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 '''
  Unit tests for oc serviceaccount
 '''
@@ -41,7 +42,7 @@ class OCStorageClassTest(unittest.TestCase):
             'debug': False,
             'name': 'testsc',
             'provisioner': 'aws-ebs',
-            'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
+            'annotations': {'storageclass.kubernetes.io/is-default-class': "true"},
             'parameters': {'type': 'gp2'},
             'api_version': 'v1',
             'default_storage_class': 'true',
@@ -58,7 +59,7 @@ class OCStorageClassTest(unittest.TestCase):
                 "uid": "4d8320c9-e66f-11e6-8edc-0eece8f2ce22",
                 "resourceVersion": "2828",
                 "creationTimestamp": "2017-01-29T22:07:19Z",
-                "annotations": {"storageclass.beta.kubernetes.io/is-default-class": "true"}
+                "annotations": {"storageclass.kubernetes.io/is-default-class": "true"}
             },
             "provisioner": "kubernetes.io/aws-ebs",
             "parameters": {"type": "gp2"},
@@ -101,7 +102,7 @@ class OCStorageClassTest(unittest.TestCase):
         # Assert
         self.assertTrue(generated_spec['provisioner'], 'kubernetes.io/aws-ebs')
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected
@@ -128,7 +129,7 @@ class OCStorageClassTest(unittest.TestCase):
             'debug': False,
             'name': 'testsc',
             'provisioner': 'kubernetes.io/aws-ebs',
-            'annotations': {'storageclass.beta.kubernetes.io/is-default-class': "true"},
+            'annotations': {'storageclass.kubernetes.io/is-default-class': "true"},
             'parameters': {'type': 'gp2'},
             'api_version': 'v1',
             'default_storage_class': 'true',
@@ -145,7 +146,7 @@ class OCStorageClassTest(unittest.TestCase):
                 "uid": "4d8320c9-e66f-11e6-8edc-0eece8f2ce22",
                 "resourceVersion": "2828",
                 "creationTimestamp": "2017-01-29T22:07:19Z",
-                "annotations": {"storageclass.beta.kubernetes.io/is-default-class": "true"}
+                "annotations": {"storageclass.kubernetes.io/is-default-class": "true"}
             },
             "provisioner": "kubernetes.io/aws-ebs",
             "parameters": {"type": "gp2"},
@@ -188,7 +189,7 @@ class OCStorageClassTest(unittest.TestCase):
         # Assert
         self.assertTrue(generated_spec['provisioner'], 'kubernetes.io/aws-ebs')
         self.assertTrue(results['changed'])
-        self.assertEqual(results['results']['returncode'], 0)
+        self.assertEqual(results['module_results']['returncode'], 0)
         self.assertEqual(results['state'], 'present')
 
         # Making sure our mock was called as we expected

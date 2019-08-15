@@ -23,7 +23,7 @@
 - when: openshift_logging_facts['elasticsearch']['deploymentconfigs'].keys() | count > 0
   block:
     - set_fact:
-        __es_dc_name: "{{ openshift_logging_facts['elasticsearch']['deploymentconfigs'].keys()[0] }}"
+        __es_dc_name: "{{ openshift_logging_facts['elasticsearch']['deploymentconfigs'].keys() | list | first }}"
 
     - set_fact:
         __openshift_logging_es_recover_after_time: "{{ openshift_logging_facts['elasticsearch']['deploymentconfigs'][__es_dc_name]['containers']['elasticsearch']['env'] | entry_from_name_value_pair('RECOVER_AFTER_TIME') }}"
@@ -50,7 +50,7 @@
 - when: openshift_logging_facts['elasticsearch_ops']['deploymentconfigs'].keys() | count > 0
   block:
     - set_fact:
-        __es_dc_name: "{{ openshift_logging_facts['elasticsearch_ops']['deploymentconfigs'].keys()[0] }}"
+        __es_dc_name: "{{ openshift_logging_facts['elasticsearch_ops']['deploymentconfigs'].keys() | list | first }}"
 
     - set_fact:
         __openshift_logging_es_ops_recover_after_time: "{{ openshift_logging_facts['elasticsearch_ops']['deploymentconfigs'][__es_dc_name]['containers']['elasticsearch']['env'] | entry_from_name_value_pair('RECOVER_AFTER_TIME') }}"
@@ -107,7 +107,6 @@
         __openshift_logging_curator_default_days: "{{ openshift_logging_facts['curator']['deploymentconfigs']['logging-curator']['containers']['curator']['env'] | entry_from_name_value_pair('CURATOR_DEFAULT_DAYS') }}"
         __openshift_logging_curator_run_hour: "{{ openshift_logging_facts['curator']['deploymentconfigs']['logging-curator']['containers']['curator']['env'] | entry_from_name_value_pair('CURATOR_RUN_HOUR') }}"
         __openshift_logging_curator_run_minute: "{{ openshift_logging_facts['curator']['deploymentconfigs']['logging-curator']['containers']['curator']['env'] | entry_from_name_value_pair('CURATOR_RUN_MINUTE') }}"
-        __openshift_logging_curator_run_timezone: "{{ openshift_logging_facts['curator']['deploymentconfigs']['logging-curator']['containers']['curator']['env'] | entry_from_name_value_pair('CURATOR_RUN_TIMEZONE') }}"
         __openshift_logging_curator_nodeselector: "{{ openshift_logging_facts['curator']['deploymentconfigs']['logging-curator']['nodeSelector'] | default('') | from_yaml }}"
 
     - conditional_set_fact:
@@ -232,7 +231,6 @@
       openshift_logging_curator_default_days: openshift_logging_curator_default_days | __openshift_logging_curator_default_days
       openshift_logging_curator_run_hour: openshift_logging_curator_run_hour | __openshift_logging_curator_run_hour
       openshift_logging_curator_run_minute: openshift_logging_curator_run_minute | __openshift_logging_curator_run_minute
-      openshift_logging_curator_run_timezone: openshift_logging_curator_run_timezone | __openshift_logging_curator_run_timezone
       openshift_logging_curator_cpu_limit: openshift_logging_curator_cpu_limit | __openshift_logging_curator_cpu_limit
       openshift_logging_curator_cpu_request: openshift_logging_curator_cpu_request | __openshift_logging_curator_cpu_request
       openshift_logging_curator_memory_limit: openshift_logging_curator_memory_limit | __openshift_logging_curator_memory_limit

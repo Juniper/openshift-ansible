@@ -1,6 +1,6 @@
 ---
 - name: Ensure that ElasticSearch has nodes to run on
-  import_role:
+  include_role:
     name: openshift_control_plane
     tasks_from: ensure_nodes_matching_selector.yml
   vars:
@@ -18,6 +18,16 @@
 - fail:
     msg: Invalid deployment type, one of ['data-master', 'data-client', 'master', 'client'] allowed
   when: not openshift_logging_elasticsearch_deployment_type in __allowed_es_types
+
+- when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
+  name: "Ensure openshift_logging_elasticsearch_hostmount_path is set"
+  assert:
+    that:
+    - openshift_logging_elasticsearch_hostmount_path is defined
+    - "openshift_logging_elasticsearch_hostmount_path != ''"
+    msg: |-
+      openshift_logging_elasticsearch_hostmount_path has not been set and is required for openshift_logging_elasticsearch_storage_type = "hostmount"
 
 - set_fact:
     elasticsearch_name: "{{ 'logging-elasticsearch' ~ ( (openshift_logging_elasticsearch_ops_deployment | default(false) | bool) | ternary('-ops', '')) }}"
@@ -66,6 +76,8 @@
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
     image_pull_secrets: "{{ openshift_logging_elasticsearch_image_pull_secret }}"
+    secrets:
+    - logging-elasticsearch
   when: openshift_logging_elasticsearch_image_pull_secret != ''
 
 - name: Create ES service account
@@ -73,6 +85,8 @@
     state: present
     name: "aggregated-logging-elasticsearch"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    secrets:
+    - logging-elasticsearch
   when:
   - openshift_logging_elasticsearch_image_pull_secret == ''
 
@@ -101,6 +115,15 @@
     resource_kind: cluster-role
     resource_name: system:auth-delegator
     user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace}}:aggregated-logging-elasticsearch"
+
+- oc_adm_policy_user:
+    state: present
+    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
+    resource_kind: scc
+    resource_name: hostmount-anyuid
+    user: "system:serviceaccount:{{ openshift_logging_elasticsearch_namespace}}:aggregated-logging-elasticsearch"
+  when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
 
 # logging-metrics-reader role
 - template:
@@ -264,30 +287,7 @@
     when: _es_dcs.stdout != ""
 
 # secret
-- name: Set ES secret
-  oc_secret:
-    state: present
-    name: "logging-elasticsearch"
-    namespace: "{{ openshift_logging_elasticsearch_namespace }}"
-    files:
-    - name: key
-      path: "{{ generated_certs_dir }}/logging-es.jks"
-    - name: truststore
-      path: "{{ generated_certs_dir }}/truststore.jks"
-    - name: searchguard.key
-      path: "{{ generated_certs_dir }}/elasticsearch.jks"
-    - name: searchguard.truststore
-      path: "{{ generated_certs_dir }}/truststore.jks"
-    - name: admin-key
-      path: "{{ generated_certs_dir }}/system.admin.key"
-    - name: admin-cert
-      path: "{{ generated_certs_dir }}/system.admin.crt"
-    - name: admin-ca
-      path: "{{ generated_certs_dir }}/ca.crt"
-    - name: admin.jks
-      path: "{{ generated_certs_dir }}/system.admin.jks"
-    - name: passwd.yml
-      path: "{{ generated_certs_dir }}/passwd.yml"
+- include_tasks: generate_secret.yaml
 
 # services
 # bz1636248 - need to delete the service if it exists because clusterIP is immutable
@@ -305,8 +305,8 @@
     name: "logging-{{ es_component }}-cluster"
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   when:
-  - logging_elasticsearch_cluster_service.results.returncode == 0
-  - logging_elasticsearch_cluster_service.results.results[0] | from_yaml | walk('spec.clusterIP', '') != 'None'
+  - logging_elasticsearch_cluster_service.module_results.returncode == 0
+  - logging_elasticsearch_cluster_service.module_results.results[0] | from_yaml | walk('spec.clusterIP', '') != 'None'
 
 - name: Set logging-{{ es_component }}-cluster service
   oc_service:
@@ -383,11 +383,11 @@
     namespace: "{{ openshift_logging_elasticsearch_namespace }}"
   register: logging_elasticsearch_pvc
 
-# logging_elasticsearch_pvc.results.results | length > 0 returns a false positive
+# logging_elasticsearch_pvc.module_results.results | length > 0 returns a false positive
 # so we check for the presence of 'stderr' to determine if the obj exists or not
 # the RC for existing and not existing is both 0
 - when:
-  - logging_elasticsearch_pvc.results.stderr is defined
+  - logging_elasticsearch_pvc.module_results.stderr is defined
   - openshift_logging_elasticsearch_storage_type == "pvc"
   block:
   # storageclasses are used by default but if static then disable
@@ -401,7 +401,6 @@
       size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
       access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
       pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
-      storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
     when:
     - not openshift_logging_elasticsearch_pvc_dynamic | bool
 
@@ -415,6 +414,7 @@
       size: "{{ (openshift_logging_elasticsearch_pvc_size | trim | length == 0) | ternary('10Gi', openshift_logging_elasticsearch_pvc_size) }}"
       access_modes: "{{ openshift_logging_elasticsearch_pvc_access_modes | list }}"
       pv_selector: "{{ openshift_logging_elasticsearch_pvc_pv_selector }}"
+      storage_class_name: "{{ openshift_logging_elasticsearch_pvc_storage_class_name | default('', true) }}"
     when:
     - openshift_logging_elasticsearch_pvc_dynamic | bool
 
@@ -446,6 +446,46 @@
     es_deploy_name: "{{ openshift_logging_elasticsearch_deployment_name }}"
   when: openshift_logging_elasticsearch_deployment_name != ""
 
+# label nodes for hostmount path
+- when:
+  - openshift_logging_elasticsearch_storage_type == "hostmount"
+  block:
+  - set_fact:
+      hostmount_node_selector: "{{ { openshift_logging_elasticsearch_hostmount_nodeselector_key : es_dc_index } }}"
+
+  - name: check if a node has already been allocated for dc
+    oc_obj:
+      state: list
+      kind: node
+      selector: "{{ hostmount_node_selector | map_to_pairs }}"
+    register: es_hostmount_selected_node
+
+  - when:
+    - "es_hostmount_selected_node['module_results']['results'][0]['items'] | default([]) | length == 0"
+    block:
+    - name: Retrieve list of schedulable es nodes that are not already allocated for another dc
+      oc_obj:
+        state: list
+        kind: node
+        selector: "{{ openshift_logging_elasticsearch_nodeselector | map_to_pairs }},{{ openshift_logging_elasticsearch_hostmount_nodeselector_key }} notin ({% for iter in range( openshift_logging_es_cluster_size | int ) -%}{{ iter }}{% if not loop.last %},{% endif %}{% endfor -%})"
+        field_selector: "spec.unschedulable!=true"
+      register: es_available_nodes
+
+    - name: "Ensure that has nodes for ES to run on"
+      assert:
+        that: "{{ es_available_nodes['module_results']['results'][0]['items'] | default([]) | length != 0 }}"
+        msg: |-
+          No schedulable nodes found matching node selector for elasticsearch.
+
+    - name: label node where dc will be stick
+      oc_label:
+        name: "{{ es_available_nodes['module_results']['results'][0]['items'][0].metadata.name }}"
+        state: add
+        kind: node
+        labels: "{{ hostmount_node_selector | dict2items }}"
+      when:
+      - "es_available_nodes['module_results']['results'][0]['items'] | default([]) | length != 0"
+
 # DC
 - name: Set ES dc templates
   template:
@@ -460,7 +500,7 @@
     es_cpu_limit: "{{ openshift_logging_elasticsearch_cpu_limit | default('') }}"
     es_cpu_request: "{{ openshift_logging_elasticsearch_cpu_request | min_cpu(openshift_logging_elasticsearch_cpu_limit | default(none)) }}"
     es_memory_limit: "{{ openshift_logging_elasticsearch_memory_limit }}"
-    es_node_selector: "{{ openshift_logging_elasticsearch_nodeselector | default({}) }}"
+    es_node_selector: "{{ hostmount_node_selector if hostmount_node_selector is defined else openshift_logging_elasticsearch_nodeselector | default({}) }}"
     es_storage_groups: "{{ openshift_logging_elasticsearch_storage_group | default([]) }}"
     es_container_security_context: "{{ _es_containers.elasticsearch.securityContext if _es_containers is defined and 'elasticsearch' in _es_containers and 'securityContext' in _es_containers.elasticsearch else None }}"
     deploy_type: "{{ openshift_logging_elasticsearch_deployment_type }}"

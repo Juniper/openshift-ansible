@@ -23,7 +23,6 @@ Environment variables may also be used.
 * [Kuryr Networking Configuration](#kuryr-networking-configuration)
 * [Provider Network Configuration](#provider-network-configuration)
 * [Multi-Master Configuration](#multi-master-configuration)
-* [Provider Network Configuration](#provider-network-configuration)
 * [Cinder-Backed Persistent Volumes Configuration](#cinder-backed-persistent-volumes-configuration)
 * [Cinder-Backed Registry Configuration](#cinder-backed-registry-configuration)
 * [Swift or Ceph Rados GW Backed Registry Configuration](#swift-or-ceph-rados-gw-backed-registry-configuration)
@@ -761,6 +760,40 @@ openshift_kuryr_subnet_driver: namespace
 openshift_kuryr_sg_driver: namespace
 ```
 
+When namespace isolation is enabled there is a new subnet per namespace being
+created. If port pooling is enabled, in order to pre-populate the newly created
+namespaces, i.e., to have pools ready for the pods on that namespace, the
+kuryrnet handler needs to be enabled on the kuryr-config configmap after the
+installation is completed:
+
+```
+$ oc -n KURYR_NAMESPACE edit cm kuryr-config
+
+...
+[kubernetes]
+enabled_handlers = vif,lb,lbaasspec,namespace,*kuryrnet*
+...
+```
+
+Note depending on the Kuryr controller image version, this feature (handler)
+may not be available.
+
+### Network Policies
+
+By default, kuryr is configured with the default isolation policy where pods
+isolation is statically defined. Kuryr also permits to enable more advanced
+and dynamic isolation policies by implementing network policies through
+security groups. To enable it you need to uncomment the following on the
+all.yml inventory file:
+
+```yaml
+openshift_kuryr_subnet_driver: namespace
+openshift_kuryr_sg_driver: policy
+```
+
+Note enabling the namespace subnet driver is required to enabled network
+policy isolation
+
 
 ### Kuryr Controller and CNI healthchecks probes
 
@@ -906,6 +939,10 @@ In `inventory/group_vars/all.yml`:
 
 * `openshift_openstack_provider_network_name` Provider network name. Setting this will cause the `openshift_openstack_external_network_name` and `openshift_openstack_private_network_name` parameters to be ignored.
 
+If you are using Octavia as the load balancer, set the following as well:
+
+* `openshift_openstack_node_subnet_name`
+* `openshift_openstack_load_balancer_floating_ip: false`
 
 ## Cinder-Backed Persistent Volumes Configuration
 
@@ -960,10 +997,13 @@ and then set the following in `inventory/group_vars/OSEv3.yml`:
 * `openshift_hosted_registry_storage_volume_size`: 10Gi
 
 For a volume *you created*, you must also specify its **UUID** (it must be
-the UUID, not the volume's name):
+the UUID, not the volume's name). If using the default storage class, you must specify
+that as well (for OpenStack it's `standard`):
 
 ```
 openshift_hosted_registry_storage_openstack_volumeID: e0ba2d73-d2f9-4514-a3b2-a0ced507fa05
+openshift_hosted_registry_storage_annotations:
+- 'volume.beta.kubernetes.io/storage-class: standard'
 ```
 
 If you want the volume *created automatically*, set the desired name instead:
@@ -1115,7 +1155,7 @@ Modify the all.yml file and add the following variables:
 ```
 openshift_openstack_master_group_name: node-config-master-crio
 openshift_openstack_infra_group_name: node-config-infra-crio
-openshift_openstack_compute_group_name: node-config-compute-crio  
+openshift_openstack_compute_group_name: node-config-compute-crio
 ```
 
 NOTE: Currently, OpenShift builds require docker.
@@ -1150,6 +1190,8 @@ openshift_use_crio: true
 
 ```
 openshift_openstack_master_group_name: node-config-master-crio
+openshift_openstack_infra_group_name: node-config-infra-crio
+openshift_openstack_compute_group_name: node-config-compute-crio
 ```
 
 ### Some nodes using cri-o, some others docker
@@ -1225,7 +1267,7 @@ After a successful installation, the containerRuntimeVersion field says the CR
 it uses:
 
 ```
-$ oc get nodes -o=custom-columns=NAME:.metadata.name,CR:.status.nodeInfo.containerRuntimeVersion --selector='node-role.kubernetes.io/compute=true'                                                                   
+$ oc get nodes -o=custom-columns=NAME:.metadata.name,CR:.status.nodeInfo.containerRuntimeVersion --selector='node-role.kubernetes.io/compute=true'
 NAME                                  CR
 app-node-0.shiftstack.automated.lan   cri-o://1.11.5
 app-node-1.shiftstack.automated.lan   docker://1.13.1
@@ -1263,4 +1305,74 @@ acf2afc99b950       registry.redhat.io/openshift3/ose-node@sha256:3da731d733cd4d
 6814b5f7a05d7       registry.redhat.io/openshift3/ose-node@sha256:3da731d733cd4d67897d22bfdcb027b009494de667bd7a3c870557102ce10bf5                   41 minutes ago      Running             sdn                 0
 [openshift@app-node-0 ~]$ sudo docker ps
 sudo: docker: command not found
+```
+
+## Opening Optional Ports
+There are certian optional and legacy features that require ports to be opened. The code provided in the following sections can be used to enable these features.
+
+### Metrics
+If you want to enable metrics in your openshift cluster, then port 10255 must be open on all nodes in the cluster. The following code should be added to openshift_openstack_node_secgroup_rules in main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 10255
+    port_range_max: 10255
+  - direction: ingress
+    protocol: udp
+    port_range_min: 10255
+    port_range_max: 10255
+```
+
+### Prometheus
+The following code to open ports for prometheus should also be added to the openshift_openstack_node_secgroup_rules section of main.yml.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9100
+    port_range_max: 9100
+```
+
+### Elastic Search
+Add this to the openshift_openstack_node_secgroup_rules section of main.yml to enable elastic search.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9200
+    port_range_max: 9200
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 9300
+    port_range_max: 9300
+```
+
+### Using Pacemaker HA
+If you choose to use Pacemaker to manage the HA system on the master nodes, the following changes should be made to the openshift_openstack_master_secgroup_rules section.
+
+```
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 2224
+    port_range_max: 2224
+  - direction: ingress
+    protocol: udp
+    port_range_min: 5404
+    port_range_max: 5405
+```
+
+The following Documentation may prove helpful as well:
+- https://docs.openshift.com/enterprise/3.1/architecture/infrastructure_components/kubernetes_infrastructure.html#high-availability-masters
+- https://docs.openshift.com/enterprise/3.1/install_config/upgrading/pacemaker_to_native_ha.html
+
+### Template Router
+If you are running a template router to expose your statistics, there are a few changes you need to make. First, add this to main.yml under the openshift_openstack_infra_secgroup_rules section.
+
+```
+  # Required when running template router to access statistics
+  - direction: ingress
+    protocol: tcp
+    port_range_min: 1936
+    port_range_max: 1936
 ```

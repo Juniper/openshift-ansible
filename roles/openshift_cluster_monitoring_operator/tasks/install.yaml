@@ -60,7 +60,7 @@
       name: openshift-monitoring
       state: list
     register: get_output
-    until: not get_output.results.stderr is defined
+    until: not get_output.module_results.stderr is defined
     retries: 30
     delay: 1
     changed_when: false
@@ -116,8 +116,8 @@
   command: "{{ openshift_client_binary }} get crd servicemonitors.monitoring.coreos.com -n openshift-monitoring --config={{ mktemp.stdout }}/admin.kubeconfig"
   register: crd
   until: crd.rc == 0
-  delay: 30
-  retries: 30
+  delay: "{{ openshift_cluster_monitoring_operator_crd_delay }}"
+  retries: "{{ openshift_cluster_monitoring_operator_crd_retries }}"
 
 - name: Delete temp directory
   file:

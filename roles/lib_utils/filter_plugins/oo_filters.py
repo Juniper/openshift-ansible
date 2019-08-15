@@ -561,7 +561,7 @@ that result to this filter plugin.
 
     - name: Save the SA bearer token secret name
       set_fact:
-        management_token: "{{ sa.results | lib_utils_oo_filter_sa_secrets }}"
+        management_token: "{{ sa.module_results | lib_utils_oo_filter_sa_secrets }}"
 
     - name: Get the SA bearer token value
       oc_secret:
@@ -573,7 +573,7 @@ that result to this filter plugin.
 
     - name: Print the bearer token value
       debug:
-        var: sa_secret.results.decoded.token
+        var: sa_secret.module_results.decoded.token
 
     """
     secret_name = None
@@ -658,7 +658,7 @@ def lib_utils_oo_oreg_image(image_default, oreg_url):
     oreg_parts = oreg_url.rsplit('/', 2)
     if len(oreg_parts) < 2:
         raise errors.AnsibleFilterError("oreg_url malformed: {}".format(oreg_url))
-    if not (len(oreg_parts) >= 3 and '.' in oreg_parts[0]):
+    if not (len(oreg_parts) >= 2 and '.' in oreg_parts[0]):
         # oreg_url does not include host information; we'll just return etcd default
         return image_default
 

@@ -7,6 +7,20 @@
 
 # tasks file for openshift_node_upgrade
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1660880
+# Delete the SDN/OVS pods to allow any changes to the DaemonSets to be applied.
+- name: Delete OpenShift SDN/OVS pods prior to upgrade
+  shell: >
+    {{ openshift_client_binary }} get pods
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    --field-selector=spec.nodeName={{ l_kubelet_node_name | lower }}
+    -o json
+    -n openshift-sdn |
+    {{ openshift_client_binary }} delete
+    --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+    -f -
+  delegate_to: "{{ groups.oo_first_master.0 }}"
+
 - name: stop services for upgrade
   import_tasks: upgrade/stop_services.yml
 
@@ -45,7 +59,7 @@
   yedit:
     src: /etc/crictl.yaml
     key: runtime-endpoint
-    value: "{{ openshift_crio_var_sock }}"
+    value: "unix://{{ openshift_crio_var_sock }}"
   when:
   - openshift_use_crio | default(False) | bool
 
@@ -89,5 +103,7 @@
   register: node_upgrade_oc_csr_approve
   retries: 30
   until: node_upgrade_oc_csr_approve is succeeded
+
+- import_tasks: firewall.yml
 
 - import_tasks: journald.yml
