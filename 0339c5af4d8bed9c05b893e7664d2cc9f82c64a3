@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "705bda22_2a1de184",
+        "filename": "roles/contrail_master/templates/contrail-nested.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-15T09:22:08Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 88,
+        "startChar": 65,
+        "endLine": 88,
+        "endChar": 67
+      },
+      "revId": "0339c5af4d8bed9c05b893e7664d2cc9f82c64a3",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
