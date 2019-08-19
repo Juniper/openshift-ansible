@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "588a5939_f802f5b3",
+        "filename": "inventory/ose-install",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-19T18:17:14Z",
+      "side": 1,
+      "message": "remove this pls",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 32
+      },
+      "revId": "d2fc7bdd461a7804b7adc5ecb2470eaeaa51c5fb",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
