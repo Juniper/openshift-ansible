@@ -1,39 +1,18 @@
 ---
-- name: Contrail wait for come up
+- name: Contrail wait for all pods
   hosts: oo_first_master
-  tasks:
-    - name: Waiting for pods to come up
-      wait_for: timeout=360
-      delegate_to: localhost
-      when: openshift_use_contrail | default(false) | bool
+  command: /tmp/wait_for_pod.sh
+  register: contrail_pod_status
+  failed_when: "'ERROR' in contrail_pod_status.stdout"
 
-- name: Contrail wait for pod check script
-  hosts: oo_first_master
-  tasks:
-    - name: Check Pods script to Master Node
-      command: /tmp/wait_for_pod.sh
-      when: openshift_use_contrail | default(false) | bool
-      ignore_errors: True
-
-- name: Contrail Sanitize schema transformer
+- name: Contrail Restarting dnsmasq service
   hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
-  roles:
-    - role: contrail_common
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-    - role: contrail_st
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool
-
-- name: Contrail wait for pod check script
-  hosts: oo_first_master
   tasks:
-    - name: Check Pods script to Master Node
-      command: /tmp/wait_for_pod.sh
-      register: command_result
-      failed_when: "'ERROR' in command_result.stdout"
+    - name: Restart dnsmasq
+      service:
+        name: "dnsmasq"
+        state: restarted
+        enabled: yes
       when:
         - openshift_use_contrail | default(false) | bool
         - not nested_mode_contrail | default(false) | bool
@@ -47,14 +26,3 @@
         - openshift_use_contrail | default(false) | bool
         - not os_firewall_use_firewalld | default(False) | bool
 
-- name: Contrail Restarting dnsmasq service
-  hosts: "{{ openshift_node_scale_up_group | default('oo_nodes_to_config') }}"
-  tasks:
-    - name: Restart dnsmasq
-      service:
-        name: "dnsmasq"
-        state: restarted
-        enabled: yes
-      when:
-        - openshift_use_contrail | default(false) | bool
-        - not nested_mode_contrail | default(false) | bool

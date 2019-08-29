@@ -72,8 +72,6 @@
   - role: nuage_node
     when: openshift_use_nuage | default(false) | bool
 
-- import_playbook: contrail_sanitize.yml
-
 - name: NSX Node Configuration
   hosts: oo_nodes_to_config
   roles:
@@ -97,3 +95,12 @@
         installer_phase_node_join:
           status: "Complete"
           end: "{{ lookup('pipe', 'date +%Y%m%d%H%M%SZ') }}"
+
+- name: Contrail Installation
+  hosts: oo_first_master
+  roles:
+   - role: contrail_master
+     when: openshift_use_contrail | default(false) | bool
+
+- import_playbook: contrail_sanitize.yml
+
