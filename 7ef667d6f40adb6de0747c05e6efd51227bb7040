@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b72e9fae_02eefc21",
+        "filename": "playbooks/openshift-node/private/contrail_sanitize.yml",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-30T21:16:04Z",
+      "side": 0,
+      "message": "please include this everywhere you want to check for failed cases",
+      "range": {
+        "startLine": 35,
+        "startChar": 1,
+        "endLine": 36,
+        "endChar": 53
+      },
+      "revId": "7ef667d6f40adb6de0747c05e6efd51227bb7040",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
