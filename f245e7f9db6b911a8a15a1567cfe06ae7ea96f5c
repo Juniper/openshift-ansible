@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3ed4d4b_15926eb4",
+        "filename": "roles/contrail_master/tasks/os_contrail_master.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-30T18:41:52Z",
+      "side": 1,
+      "message": "can it be contrail-config",
+      "range": {
+        "startLine": 56,
+        "startChar": 16,
+        "endLine": 56,
+        "endChar": 30
+      },
+      "revId": "f245e7f9db6b911a8a15a1567cfe06ae7ea96f5c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c04e0f99_f0fd6ce8",
+        "filename": "roles/contrail_master/tasks/os_contrail_master.yaml",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-30T18:41:52Z",
+      "side": 1,
+      "message": "contrail-control here ?",
+      "range": {
+        "startLine": 61,
+        "startChar": 16,
+        "endLine": 61,
+        "endChar": 31
+      },
+      "revId": "f245e7f9db6b911a8a15a1567cfe06ae7ea96f5c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16eb581b_91e77d90",
+        "filename": "roles/contrail_master/templates/wait_for_pod.j2",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-30T18:41:52Z",
+      "side": 1,
+      "message": "hardcoded here",
+      "range": {
+        "startLine": 51,
+        "startChar": 49,
+        "endLine": 51,
+        "endChar": 64
+      },
+      "revId": "f245e7f9db6b911a8a15a1567cfe06ae7ea96f5c",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
