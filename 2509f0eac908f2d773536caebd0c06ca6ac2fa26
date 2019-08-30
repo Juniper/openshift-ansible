@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "556b8c81_5f27470e",
+        "filename": "roles/contrail_master/tasks/os_contrail_master.yaml",
+        "patchSetId": 6
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 570
+      },
+      "writtenOn": "2019-08-30T21:28:29Z",
+      "side": 1,
+      "message": "delete",
+      "range": {
+        "startLine": 141,
+        "startChar": 42,
+        "endLine": 141,
+        "endChar": 48
+      },
+      "revId": "2509f0eac908f2d773536caebd0c06ca6ac2fa26",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
