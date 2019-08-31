@@ -73,8 +73,6 @@
 
 - name: Contrail wait for image downloader pods
   command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
-  failed_when: "'ERROR' in contrail_pod_status.stdout"
 
 - name: Contrail starting infra-vars
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
@@ -92,7 +90,6 @@
 
 - name: Contrail wait for vrouter-agent
   command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
 
 - name: Contrail starting config analytics webui
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
@@ -110,8 +107,6 @@
 
 - name: Contrail wait for config analytics webui
   command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
-  failed_when: "'ERROR' in contrail_pod_status.stdout"
 
 - name: Contrail starting control
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
@@ -122,8 +117,6 @@
 
 - name: Contrail wait for control
   command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
-  failed_when: "'ERROR' in contrail_pod_status.stdout"
 
 - name: Contrail starting orchestartor plugins
   command: "{{ openshift_client_binary }} create -f /tmp/{{ item }}.yaml"
@@ -134,8 +127,6 @@
 
 - name: Contrail wait for orchestartor plugins
   command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
-  failed_when: "'ERROR' in contrail_pod_status.stdout"
 
 - name: Contrail deleting all image downloader
   command: "{{ openshift_client_binary }} delete -f /tmp/{{ item }}.yaml"
@@ -146,9 +137,3 @@
     - "contrail-image-downloader-controller"
     - "contrail-image-downloader-analytics"
     - "contrail-image-downloader-agent"
-
-- name: Contrail wait for all image downloader termination
-  command: /tmp/wait_for_pod.sh
-  register: contrail_pod_status
-  failed_when: "'ERROR' in contrail_pod_status.stdout"
-

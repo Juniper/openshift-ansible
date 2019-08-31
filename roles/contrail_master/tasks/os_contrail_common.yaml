@@ -7,6 +7,14 @@
     mode: 0644
   run_once: True
 
+- name: Copy the wait for pod script to master node
+  template:
+    src: wait_for_pod.j2
+    dest: /tmp/wait_for_pod.sh
+    owner: root
+    mode: 0777
+  run_once: True
+
 - name: Check if the contrail-system namespace is created
   oc_project:
     state: present
