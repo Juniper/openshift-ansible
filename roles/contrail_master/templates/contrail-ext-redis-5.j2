@@ -34,6 +34,12 @@ spec:
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
+        - mountPath: /usr/bin
+          name: host-usr-bin
+        - mountPath: /var/run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       containers:
       - name: redis
         image: "docker.io/redis:4.0.2"
@@ -58,6 +64,12 @@ spec:
       - name: host-usr-bin
         hostPath:
           path: /usr/bin
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
+      - name : docker-unix-socket
+        hostPath:
+          path : /var/run
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret

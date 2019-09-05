@@ -88,8 +88,14 @@ spec:
         - configMapRef:
             name: agent-env
         volumeMounts:
+        - mountPath: /usr/bin
+          name: host-usr-bin
         - mountPath: /host/usr/bin
           name: host-usr-bin
+        - mountPath: /var/run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       - name: contrail-vrouter-kernel-init
         image: "{{ contrail_registry }}/contrail-vrouter-kernel-init:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
@@ -207,6 +213,9 @@ spec:
       - name: var-lib-contrail
         hostPath:
           path: /var/lib/contrail
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
       - name: var-crashes
         hostPath:
           path: /var/contrail/crashes

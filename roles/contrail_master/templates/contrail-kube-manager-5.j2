@@ -51,6 +51,12 @@ spec:
         volumeMounts:
         - mountPath: /host/usr/bin
           name: host-usr-bin
+        - mountPath: /usr/bin
+          name: host-usr-bin
+        - mountPath: /var/run
+          name: docker-unix-socket
+        - mountPath: /usr/lib
+          name: host-usr-lib
       containers:
       - name: contrail-kube-manager
         image: "{{ contrail_registry }}/contrail-kubernetes-kube-manager:{{ contrail_container_tag }}"
@@ -84,6 +90,12 @@ spec:
       - name: localtime
         hostPath:
           path: /etc/localtime
+      - name: host-usr-lib
+        hostPath:
+          path: /usr/lib
+      - name : docker-unix-socket
+        hostPath:
+          path : /var/run
 {% if contrail_registry_username is defined and contrail_registry_password %}
       imagePullSecrets:
       - name: contrail-registry-secret

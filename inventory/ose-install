@@ -89,7 +89,8 @@ openshift_use_openshift_sdn=false
 os_sdn_network_plugin_name='cni'
 openshift_use_contrail=true
 #openshift_use_calico=true
-
+os_firewall_use_firewalld=true
+firewall_zone=public
 
 ###########################################################################
 ### OpenShift Authentication Vars
