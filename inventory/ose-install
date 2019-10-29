@@ -79,6 +79,12 @@ pod_subnets="10.128.0.0/14"
 #osm_cluster_network_cidr=10.128.0.0/14
 #openshift_portal_net=172.30.0.0/16
 
+# Multi interface config
+#multi_interface='true'
+#control_nodes=192.168.100.2
+#controller_nodes=10.84.13.54
+#vrouter_physical_interface=ens2f0
+#vrouter_gateway=192.168.100.2
 ###########################################################################
 ### OpenShift Network Vars
 ###########################################################################
