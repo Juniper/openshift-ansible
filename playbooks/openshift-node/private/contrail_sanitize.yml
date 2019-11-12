@@ -27,4 +27,13 @@
       when:
         - openshift_use_contrail | default(false) | bool
         - not os_firewall_use_firewalld | default(False) | bool
-
+    - name: open udp port 53 firewalld
+      firewalld:
+        zone: public
+        port: "53/udp"
+        permanent: yes
+        immediate: yes
+        state: enabled
+      when:
+        - openshift_use_contrail | default(false) | bool
+        - os_firewall_use_firewalld | default(False) | bool
