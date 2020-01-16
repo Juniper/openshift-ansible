@@ -36,8 +36,6 @@ with the
 [Origin master branch](https://github.com/openshift/origin/tree/master)
 (code in development).
 
-
-
 **Getting the right openshift-ansible release**
 
 Follow this release pattern and you can't go wrong:
