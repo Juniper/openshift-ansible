@@ -37,6 +37,12 @@ spec:
         image: "{{ contrail_registry }}/contrail-nodemgr:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
         command: ["/bin/true"]
+{% if contrail_version >= 2002 %}
+      - name: contrail-download-node-provisoner-image
+        image: "{{ contrail_registry }}/contrail-provisioner:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        command: ["/bin/true"]
+{% endif %}
       - name: contrail-download-external-cassandra-image
         image: "{{ contrail_registry }}/contrail-external-cassandra:{{ contrail_container_tag }}"
         imagePullPolicy: "IfNotPresent"
