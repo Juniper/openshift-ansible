@@ -102,6 +102,27 @@ spec:
         - mountPath: /etc/localtime
           name: localtime
           containers:
+{% if contrail_version >= 2002 %}
+      - name: contrail-analytics-provisioner
+        image: "{{ contrail_registry }}/contrail-provisioner:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: env
+        - configMapRef:
+            name: nodemgr-config
+        env:
+        - name: NODE_TYPE
+          value: analytics
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: analytics-logs
+        - mountPath: /etc/localtime
+          name: localtime
+          containers:
+{% endif %}
       volumes:
       - name: analytics-logs
         hostPath:

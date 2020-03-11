@@ -192,6 +192,26 @@ spec:
           name: docker-unix-socket
         - mountPath: /etc/localtime
           name: localtime
+{% if contrail_version >= 2002 %}
+      - name: contrail-agent-provisioner
+        image: "{{ contrail_registry }}/contrail-provisioner:{{ contrail_container_tag }}"
+        imagePullPolicy: "IfNotPresent"
+        securityContext:
+          privileged: true
+        envFrom:
+        - configMapRef:
+            name: agent-env
+        - configMapRef:
+            name: agent-nodemgr-config
+        env:
+        - name: NODE_TYPE
+          value: vrouter
+        volumeMounts:
+        - mountPath: /var/log/contrail
+          name: agent-logs
+        - mountPath: /etc/localtime
+          name: localtime
+{% endif %}
       volumes:
       - name: dev
         hostPath:

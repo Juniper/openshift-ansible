@@ -3,6 +3,10 @@
     msg: Contrail doesn't support CRI-O
   when: openshift_use_crio_only | default(false) | bool
 
+- name: Evaluate contrail version from image tag
+  set_fact:
+    contrail_version: "{{ contrail_container_tag | get_contrail_version }}"
+
 - name: Run kube proxy
   import_role:
     name: kube_proxy_and_dns
