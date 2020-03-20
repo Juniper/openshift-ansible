@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a6e09f6_69774fc9",
+        "filename": "roles/contrail_master/templates/contrail-agent-5.j2",
+        "patchSetId": 2
+      },
+      "lineNbr": 195,
+      "author": {
+        "id": 175
+      },
+      "writtenOn": "2020-03-20T16:57:06Z",
+      "side": 1,
+      "message": "The provisioner container is going to be run only once. So it should be part of the init container. please do the same in other places  too.",
+      "revId": "6f6c849ab5d54598d0e4d7ae2e4fdc84cdb287d0",
+      "serverId": "c72cd27d-1743-4a55-84a4-cd13b8400c52",
+      "unresolved": true
+    }
+  ]
+}
