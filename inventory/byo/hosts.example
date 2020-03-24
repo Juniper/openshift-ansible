@@ -104,8 +104,6 @@ openshift_release=v3.7
 #openshift_docker_additional_registries=registry.example.com
 #openshift_docker_insecure_registries=registry.example.com
 #openshift_docker_blocked_registries=registry.hacker.com
-# Disable pushing to dockerhub
-#openshift_docker_disable_push_dockerhub=True
 # Use Docker inside a System Container. Note that this is a tech preview and should
 # not be used to upgrade!
 # The following options for docker are ignored:
@@ -279,6 +277,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_cloudprovider_openstack_region=region
 #openshift_cloudprovider_openstack_lb_subnet_id=subnet_id
 #
+# Note: If you're getting a "BS API version autodetection failed" when provisioning cinder volumes you may need this setting
+#openshift_cloudprovider_openstack_blockstorage_version=v2
+#
 # GCE
 #openshift_cloudprovider_kind=gce
 
@@ -356,6 +357,10 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # default storage plugin dependencies to install, by default the ceph and
 # glusterfs plugin dependencies will be installed, if available.
 #osn_storage_plugin_deps=['ceph','glusterfs','iscsi']
+
+# Hosted services selector (optional)
+# This selector would apply to router, registry, TSB and ASB deployments
+#openshift_hosted_infra_selector="region=infra"
 
 # OpenShift Router Options
 #
@@ -641,6 +646,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_storage_volume_size=10Gi
 #openshift_prometheus_storage_labels={'storage': 'prometheus'}
 #openshift_prometheus_storage_type='pvc'
+#openshift_prometheus_storage_class=glusterfs-storage
 # For prometheus-alertmanager
 #openshift_prometheus_alertmanager_storage_kind=nfs
 #openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
@@ -650,6 +656,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertmanager_storage_volume_size=10Gi
 #openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
 #openshift_prometheus_alertmanager_storage_type='pvc'
+#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
 # For prometheus-alertbuffer
 #openshift_prometheus_alertbuffer_storage_kind=nfs
 #openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
@@ -659,6 +666,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 #openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 #openshift_prometheus_alertbuffer_storage_type='pvc'
+#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
 #
 # Option B - External NFS Host
 # NFS volume must already exist with path "nfs_directory/_volume_name" on
@@ -672,6 +680,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_storage_volume_size=10Gi
 #openshift_prometheus_storage_labels={'storage': 'prometheus'}
 #openshift_prometheus_storage_type='pvc'
+#openshift_prometheus_storage_class=glusterfs-storage
 # For prometheus-alertmanager
 #openshift_prometheus_alertmanager_storage_kind=nfs
 #openshift_prometheus_alertmanager_storage_access_modes=['ReadWriteOnce']
@@ -681,6 +690,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertmanager_storage_volume_size=10Gi
 #openshift_prometheus_alertmanager_storage_labels={'storage': 'prometheus-alertmanager'}
 #openshift_prometheus_alertmanager_storage_type='pvc'
+#openshift_prometheus_alertmanager_storage_class=glusterfs-storage
 # For prometheus-alertbuffer
 #openshift_prometheus_alertbuffer_storage_kind=nfs
 #openshift_prometheus_alertbuffer_storage_access_modes=['ReadWriteOnce']
@@ -690,6 +700,7 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 #openshift_prometheus_alertbuffer_storage_volume_size=10Gi
 #openshift_prometheus_alertbuffer_storage_labels={'storage': 'prometheus-alertbuffer'}
 #openshift_prometheus_alertbuffer_storage_type='pvc'
+#openshift_prometheus_alertbuffer_storage_class=glusterfs-storage
 #
 # Option C - none -- Prometheus, alertmanager and alertbuffer will use emptydir volumes
 # which are destroyed when pods are deleted
@@ -896,6 +907,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # Enable template service broker (requires service catalog to be enabled, above)
 #template_service_broker_install=true
 
+# TSB node selector
+#template_service_broker_selector={'region': 'infra'}
+
 # Force a specific prefix (IE: registry) to use when pulling the service catalog image
 # NOTE: The registry all the way up to the start of the image name must be provided. Two examples
 # below are provided.
@@ -982,6 +996,14 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # where as this would not
 # openshift_upgrade_nodes_serial=4 openshift_upgrade_nodes_max_fail_percentage=50
 #
+# A timeout to wait for nodes to drain pods can be specified to ensure that the
+# upgrade continues even if nodes fail to drain pods in the allowed time. The
+# default value of 0 will wait indefinitely allowing the admin to investigate
+# the root cause and ensuring that disruption budgets are respected. If the
+# a timeout of 0 is used there will also be one attempt to re-try draining the
+# node. If a non zero timeout is specified there will be no attempt to retry.
+# openshift_upgrade_nodes_drain_timeout=0
+#
 # Multiple data migrations take place and if they fail they will fail the upgrade
 # You may wish to disable these or make them non fatal
 #
@@ -1065,6 +1087,9 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 # names and ports/port ranges for either masters or nodes.
 #openshift_master_open_ports=[{"service":"svc1","port":"11/tcp"}]
 #openshift_node_open_ports=[{"service":"svc2","port":"12-13/tcp"},{"service":"svc3","port":"14/udp"}]
+
+# Service port node range
+#openshift_node_port_range=30000-32767
 
 # host group for masters
 [masters]

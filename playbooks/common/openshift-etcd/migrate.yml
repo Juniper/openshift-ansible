@@ -15,6 +15,8 @@
 - name: Run pre-checks
   hosts: oo_etcd_to_migrate
   tasks:
+  - set_fact:
+      etcd_migration_in_progress: true
   - include_role:
       name: etcd
       tasks_from: migrate.pre_check
@@ -169,6 +171,11 @@
     retries: 12
     delay: 10
     until: etcd_add_check.rc == 0
+  - name: Make sure ETCD_NAME is updated
+    lineinfile:
+      regexp: ^ETCD_NAME=
+      line: "ETCD_NAME={{ etcd_hostname }}"
+      dest: /etc/etcd/etcd.conf
   - name: Set ETCD_INITIAL_CLUSTER_STATE=existing on migrated etcd host
     lineinfile:
       regexp: ^ETCD_INITIAL_CLUSTER_STATE=
@@ -241,7 +248,7 @@
   - name: Start master services
     service:
       name: "{{ item }}"
-      state: started
+      state: restarted
     register: service_status
     # Sometimes the master-api, resp. master-controllers fails to start for the first time
     until: service_status.state is defined and service_status.state == "started"
@@ -250,5 +257,9 @@
     with_items: "{{ master_services[::-1] }}"
   - fail:
       msg: "Migration failed. The following hosts were not properly migrated: {{ etcd_migration_failed | join(',') }}"
+    when:
+    - etcd_migration_failed | length > 0
+  - set_fact:
+      etcd_migration_in_progress: false
     when:
     - etcd_migration_failed | length > 0

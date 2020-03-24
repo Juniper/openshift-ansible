@@ -17,7 +17,7 @@ openshift_storage_glusterfs_block_host_vol_max: 15
 openshift_storage_glusterfs_block_storageclass: False
 openshift_storage_glusterfs_block_storageclass_default: False
 openshift_storage_glusterfs_s3_deploy: True
-openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-gluster-s3-server-rhel7' | quote if deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
+openshift_storage_glusterfs_s3_image: "{{ 'rhgs3/rhgs-s3-server-rhel7' | quote if openshift_deployment_type == 'openshift-enterprise' else 'gluster/gluster-object' | quote }}"
 openshift_storage_glusterfs_s3_version: 'latest'
 openshift_storage_glusterfs_s3_account: "{{ omit }}"
 openshift_storage_glusterfs_s3_user: "{{ omit }}"
@@ -48,7 +48,7 @@ openshift_storage_glusterfs_heketi_fstab: "{{ '/var/lib/heketi/fstab' | quote if
 openshift_storage_glusterfs_namespace: "{{ 'glusterfs' | quote if openshift_storage_glusterfs_is_native or openshift_storage_glusterfs_heketi_is_native else 'default' | quote }}"
 
 openshift_storage_glusterfs_registry_timeout: "{{ openshift_storage_glusterfs_timeout }}"
-openshift_storage_glusterfs_registry_namespace: "{{ openshift.hosted.registry.namespace | default(openshift_storage_glusterfs_namespace) }}"
+openshift_storage_glusterfs_registry_namespace: "{{ openshift_hosted_registry_namespace | default(openshift_storage_glusterfs_namespace) }}"
 openshift_storage_glusterfs_registry_is_native: "{{ openshift_storage_glusterfs_is_native }}"
 openshift_storage_glusterfs_registry_name: 'registry'
 openshift_storage_glusterfs_registry_nodeselector: "glusterfs={{ openshift_storage_glusterfs_registry_name }}-host"

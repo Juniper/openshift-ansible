@@ -102,6 +102,7 @@
     src: "{{ etcd_ca_cert }}"
     dest: "{{ etcd_generated_certs_dir}}/{{ etcd_cert_subdir }}/{{ etcd_cert_prefix }}ca.crt"
     state: hard
+    force: yes
   when: etcd_server_certs_missing | bool
   delegate_to: "{{ etcd_ca_host }}"
 
@@ -111,6 +112,13 @@
   register: g_etcd_server_mktemp
   changed_when: False
   when: etcd_server_certs_missing | bool
+
+- name: Delete existing certificate tarball if certs need to be regenerated
+  file:
+    path: "{{ etcd_generated_certs_dir }}/{{ etcd_cert_subdir }}.tgz"
+    state: absent
+  when: etcd_server_certs_missing | bool
+  delegate_to: "{{ etcd_ca_host }}"
 
 - name: Create a tarball of the etcd certs
   command: >

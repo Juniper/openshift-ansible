@@ -16,6 +16,31 @@
       local_facts:
         embedded_etcd: "{{ groups.oo_etcd_to_config | default([]) | length == 0 }}"
 
+# Prior to 3.6, openshift-ansible created etcd serving certificates
+# without a SubjectAlternativeName entry for the system hostname. The
+# SAN list in Go 1.8 is now (correctly) authoritative and since
+# openshift-ansible configures masters to talk to etcd hostnames
+# rather than IP addresses, we must correct etcd certificates.
+#
+# This play examines the etcd serving certificate SANs on each etcd
+# host and records whether or not the system hostname is missing.
+- name: Examine etcd serving certificate SAN
+  hosts: oo_etcd_to_config
+  tasks:
+  - slurp:
+      src: /etc/etcd/server.crt
+    register: etcd_serving_cert
+  - set_fact:
+      __etcd_cert_lacks_hostname: "{{ (openshift.common.hostname not in (etcd_serving_cert.content | b64decode | oo_parse_certificate_san)) | bool }}"
+
+# Redeploy etcd certificates when hostnames were missing from etcd
+# serving certificate SANs.
+- include: ../../openshift-etcd/certificates.yml
+  when:
+  - true in hostvars | oo_select_keys(groups['oo_etcd_to_config']) | oo_collect('__etcd_cert_lacks_hostname') | default([false])
+  vars:
+    etcd_certificates_redeploy: True
+
 - name: Upgrade and backup etcd
   include: ./etcd/main.yml
 
@@ -139,6 +164,7 @@
       src: "{{ openshift.common.config_base }}/master/ca-bundle.crt"
       path: "{{ openshift.common.config_base }}/master/ca.crt"
       state: link
+      force: yes
     when: ca_crt_stat.stat.isreg and not ca_bundle_stat.stat.exists
 
   - name: Update oreg value
@@ -381,12 +407,18 @@
 
   - name: Drain Node for Kubelet upgrade
     command: >
-      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }} --config={{ openshift.common.config_base }}/master/admin.kubeconfig --force --delete-local-data --ignore-daemonsets
+      {{ hostvars[groups.oo_first_master.0].openshift.common.admin_binary }} drain {{ openshift.node.nodename | lower }}
+      --config={{ openshift.common.config_base }}/master/admin.kubeconfig
+      --force --delete-local-data --ignore-daemonsets
+      --timeout={{ openshift_upgrade_nodes_drain_timeout | default(0) }}s
     delegate_to: "{{ groups.oo_first_master.0 }}"
     register: l_upgrade_control_plane_drain_result
-    until: not l_upgrade_control_plane_drain_result | failed
-    retries: 60
-    delay: 60
+    until: not (l_upgrade_control_plane_drain_result is failed)
+    retries: "{{ 1 if ( openshift_upgrade_nodes_drain_timeout | default(0) | int ) == 0 else 0 }}"
+    delay: 5
+    failed_when:
+    - l_upgrade_control_plane_drain_result is failed
+    - openshift_upgrade_nodes_drain_timeout | default(0) | int == 0
 
   roles:
   - lib_openshift
@@ -394,6 +426,7 @@
   - docker
   - openshift_node_dnsmasq
   - openshift_node_upgrade
+  - tuned
 
   post_tasks:
   - name: Set node schedulability

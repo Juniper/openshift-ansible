@@ -26,11 +26,14 @@
   openshift_facts:
     role: docker
 
+- name: Configure and start openvswitch systemd unit
+  include: openvswitch.yml
+  when: openshift_use_openshift_sdn | default(true) | bool
+
 - name: Start services
   service: name={{ item }} state=started
   with_items:
     - etcd_container
-    - openvswitch
     - "{{ openshift.common.service_type }}-master-api"
     - "{{ openshift.common.service_type }}-master-controllers"
     - "{{ openshift.common.service_type }}-node"

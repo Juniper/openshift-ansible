@@ -75,6 +75,7 @@ class OCBaseCommand(object):
         try:
             process = Popen(cmd, stdout=PIPE, stderr=PIPE)   # noqa: F405
             out, err = process.communicate(cmd)
+            err = err.decode(encoding='utf8', errors='replace')
             if len(err) > 0:
                 if 'not found' in err:
                     return {'items': []}
@@ -261,7 +262,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
     def facts_for_sccs(self):
         ''' Gathers facts for SCCs used with logging '''
         self.default_keys_for("sccs")
-        scc = self.oc_command("get", "scc", name="privileged")
+        scc = self.oc_command("get", "securitycontextconstraints.v1.security.openshift.io", name="privileged")
         if len(scc["users"]) == 0:
             return
         for item in scc["users"]:
@@ -277,7 +278,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for item in role["subjects"]:
             comp = self.comp(item["name"])
-            if comp is not None and namespace == item["namespace"]:
+            if comp is not None and namespace == item.get("namespace"):
                 self.add_facts_for(comp, "clusterrolebindings", "cluster-readers", dict())
 
 # this needs to end up nested under the service account...
@@ -289,7 +290,7 @@ class OpenshiftLoggingFacts(OCBaseCommand):
             return
         for item in role["subjects"]:
             comp = self.comp(item["name"])
-            if comp is not None and namespace == item["namespace"]:
+            if comp is not None and namespace == item.get("namespace"):
                 self.add_facts_for(comp, "rolebindings", "logging-elasticsearch-view-role", dict())
 
     # pylint: disable=no-self-use, too-many-return-statements
