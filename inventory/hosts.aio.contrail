@@ -20,7 +20,7 @@ openshift_hosted_infra_selector="node-role.kubernetes.io/infra=true"
 #oreg_auth_password=
 #oreg_url=
 
-#openshift_install_examples=false
+openshift_install_examples=false
 #openshift_image_tag=v3.11
 #system_images_registry="registry.redhat.io"
 
@@ -45,6 +45,27 @@ openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 
 openshift_master_api_port=8443
 openshift_master_console_port=8443
 
+openshift_master_cluster_method=native
+#openshift_master_cluster_hostname=openshift-aio-eth0.local
+#openshift_master_cluster_public_hostname=openshift-aio-eth0.local
+#openshift_master_default_subdomain=local
+
+###########################################################################
+### OpenShift Router and Registry Vars
+###########################################################################
+openshift_push_via_dns=true
+openshift_hosted_router_replicas=1
+openshift_hosted_registry_replicas=1
+
+###########################################################################
+### OpenShift disable metrics, monitoring, logging services for simple AIO
+###########################################################################
+openshift_logging_install_logging=false
+openshift_hosted_prometheus_deploy=false
+openshift_metrics_install_metrics=false
+openshift_enable_service_catalog=false
+template_service_broker_install=false
+ansible_service_broker_install=false
 
 #########################################################################
 ### Contrail Variables
