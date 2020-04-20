@@ -74,7 +74,7 @@ spec:
           name: docker-unix-socket
         - mountPath: /etc/localtime
           name: localtime
-{% if contrail_version >= 2002 %}
+{% if contrail_version | int >= 2002 %}
       - name: contrail-analyticsdb-provisioner
         image: "{{contrail_registry}}/contrail-provisioner:{{contrail_container_tag}}"
         imagePullPolicy: "IfNotPresent"
