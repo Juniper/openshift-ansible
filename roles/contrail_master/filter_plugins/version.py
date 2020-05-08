@@ -15,17 +15,15 @@ class FilterModule(object):
         version will be set to 9999
         If someone changes the naming conventions, he must make changes in this function to support these new conventions.
         """
-        cver = 9999
-
-        if '5.0' in tag:
-            cver = 500
-        elif '5.1' in tag:
-            cver = 510
-        else:
-            tag_date = re.findall(r"19\d\d", tag)
-            if len(tag_date) == 0:
-                tag_date = re.findall(r"20\d\d", tag)
+        for release in [r"21\d\d", r"20\d\d", r"19\d\d"]:
+            tag_date = re.findall(release, tag)
             if len(tag_date) != 0:
-                cver = int(tag_date[0])
+                return int(tag_date[0])
 
-        return cver
+        if '5.1' in tag:
+            return 510
+        elif '5.0' in tag:
+            return 500
+
+        # master/latest version
+        return 9999
