@@ -1,4 +1,0 @@
----
-contrail_masters: ""
-contrail_masters_ip: ""
-contrail_node_group: "node-config-infra"
